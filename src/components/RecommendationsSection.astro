@@ -1,0 +1,56 @@
+---
+import AnimeCard from "@/components/AnimeCard.astro";
+import { fetchRecommendations } from "@/lib/api";
+
+// Obtener datos de recomendaciones al renderizar el componente
+const recommendationsData = await fetchRecommendations(12);
+---
+
+<section id="recommendations-section" class="tab-content hidden animate-slide-up" data-tab="recommendations/anime">
+  {
+    recommendationsData.data && recommendationsData.data.length > 0 ? (
+      <div class="space-y-10 pb-8">
+        {recommendationsData.data.map((rec, recIndex) => (
+          <div class="recommendation-group">
+            {/* Header de la recomendación con información del usuario */}
+            <div class="flex items-start gap-3 mb-5">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <blockquote class="flex-1">
+                <p class="text-gray-700 italic leading-relaxed">
+                  &quot;{rec.content}&quot;
+                </p>
+                <footer class="mt-2 text-sm text-gray-500">
+                  Recommended by <cite class="font-medium text-primary not-italic">{rec.user.username}</cite>
+                  <span class="mx-2">•</span>
+                  <span class="flex items-center gap-1 inline-flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    {rec.votes} votes
+                  </span>
+                </footer>
+              </blockquote>
+            </div>
+            {/* Grid de animes recomendados */}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 content-start">
+              {rec.entry?.map((animeEntry: any) => (
+                <AnimeCard anime={animeEntry} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="flex flex-col items-center justify-center py-16 space-y-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+        </svg>
+        <p class="text-center text-gray-500">No recommendations available</p>
+      </div>
+    )
+  }
+</section>

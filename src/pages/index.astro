@@ -1,0 +1,47 @@
+---
+import Hero from "@/components/Hero.astro";
+import Menu from "@/components/Menu.astro";
+import Welcome from "@/components/Welcome.astro";
+import Layout from "@/layouts/Layout.astro";
+import TabsController from "@/components/TabsController";
+import AnimeSection from "@/components/AnimeSection.astro";
+import TopAnimeSection from "@/components/TopAnimeSection.astro";
+import RecommendationsSection from "@/components/RecommendationsSection.astro";
+import EpisodesSection from "@/components/EpisodesSection.astro";
+---
+
+<Layout title="Find information about your favorite anime">
+  <Welcome />
+  <Menu />
+  <Hero />
+  
+  {/* Navegación de pestañas - Componente React para interactividad */}
+  <TabsController client:load />
+  
+  {/* Contenido de pestañas - Componentes Astro con su propio fetch de datos */}
+  <div class="relative min-h-[80vh] overflow-hidden">
+    <AnimeSection />
+    <TopAnimeSection />
+    <RecommendationsSection />
+  </div>
+  
+  {/* Sección de episodios con su propio fetch de datos */}
+  <EpisodesSection />
+</Layout>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+</style>

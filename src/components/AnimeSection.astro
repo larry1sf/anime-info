@@ -1,0 +1,42 @@
+---
+import AnimeCard from "@/components/AnimeCard.astro";
+import { fetchAnime } from "@/lib/api";
+
+// Obtener datos de animes al renderizar el componente
+const animeData = await fetchAnime(12);
+---
+
+<section id="anime-section" class="tab-content animate-slide-up" data-tab="anime">
+  {
+    animeData.data && animeData.data.length > 0 ? (
+      <>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 content-start py-4">
+          {animeData.data.map((anime, index) => (
+            // Aplicar delay escalonado para animación
+            <div style={`animation-delay: ${index * 50}ms`} class="animate-slide-up">
+              <AnimeCard anime={anime} />
+            </div>
+          ))}
+        </div>
+        <div class="flex justify-center mt-8">
+          <a
+            href="/anime"
+            class="group flex items-center gap-2 bg-primary text-bg px-8 py-3 rounded-full hover:contrast-90 transition-all duration-300 capitalize font-medium shadow-lg hover:shadow-xl hover:scale-105"
+          >
+            See all anime series
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+      </>
+    ) : (
+      <div class="flex flex-col items-center justify-center py-16 space-y-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+        </svg>
+        <p class="text-center text-gray-500">No anime data available</p>
+      </div>
+    )
+  }
+</section>

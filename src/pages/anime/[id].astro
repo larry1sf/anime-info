@@ -1,0 +1,554 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { fetchAnimeById } from "@/lib/api";
+import type { Anime } from "@/types/api";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect("/");
+}
+
+const response = await fetchAnimeById(Number(id) ?? 0);
+const anime: Anime = response.data;
+
+// Helper para formatear números grandes
+const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toString();
+};
+
+// Helper para formatear fechas
+const formatDate = (dateStr: string) => {
+    if (!dateStr) return "Unknown";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+
+// Determinar el color del score
+const getScoreColor = (score: number) => {
+    if (score >= 8) return "text-green-600";
+    if (score >= 6) return "text-yellow-600";
+    return "text-red-600";
+};
+
+const title = anime.title_english || anime.title;
+---
+
+<Layout title={title}>
+    <div class="animate-fade-in">
+        {/* Header con navegación de regreso */}
+        <div class="mb-6">
+            <a
+                href="/"
+                class="inline-flex items-center gap-2 text-secondary hover:text-primary transition-colors duration-200 group"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 group-hover:-translate-x-1 transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span class="font-medium">Back to Home</span>
+            </a>
+        </div>
+
+        {/* Main Content Grid */}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Image & Quick Stats */}
+            <div class="lg:col-span-1 space-y-6">
+                {/* Image Card */}
+                <div
+                    class="bg-white rounded-2xl overflow-hidden shadow-lg shadow-primary/10"
+                >
+                    <div class="relative aspect-3/4 overflow-hidden">
+                        <img
+                            src={anime.images.jpg.large_image_url}
+                            alt={anime.title}
+                            class="w-full h-full object-cover"
+                            loading="eager"
+                        />
+                        {
+                            anime.airing && (
+                                <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                                    <span class="w-2 h-2 bg-white rounded-full animate-pulse" />
+                                    Airing
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10 space-y-4"
+                >
+                    <h3 class="font-bold text-lg text-primary mb-4">
+                        Statistics
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-secondary text-sm">Score</span>
+                            <div class="flex items-center gap-1.5">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 text-yellow-500"
+                                    fill="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                    ></path>
+                                </svg>
+                                <span
+                                    class={`font-bold text-lg ${getScoreColor(anime.score)}`}
+                                >
+                                    {
+                                        anime.score
+                                            ? anime.score.toFixed(2)
+                                            : "N/A"
+                                    }
+                                </span>
+                                <span class="text-xs text-secondary"
+                                    >({formatNumber(anime.scored_by)} users)</span
+                                >
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-secondary text-sm">Rank</span>
+                            <span class="font-semibold text-primary"
+                                >#{anime.rank || "N/A"}</span
+                            >
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-secondary text-sm"
+                                >Popularity</span
+                            >
+                            <span class="font-semibold text-primary"
+                                >#{anime.popularity || "N/A"}</span
+                            >
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-secondary text-sm">Members</span>
+                            <span class="font-semibold text-primary"
+                                >{formatNumber(anime.members)}</span
+                            >
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-secondary text-sm">Favorites</span
+                            >
+                            <span class="font-semibold text-primary"
+                                >{formatNumber(anime.favorites)}</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                {/* External Link */}
+                <a
+                    href={anime.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-center gap-2 w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                >
+                    <span>View on MyAnimeList</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        ></path>
+                    </svg>
+                </a>
+            </div>
+
+            {/* Right Column - Details */}
+            <div class="lg:col-span-2 space-y-6">
+                {/* Title Section */}
+                <div
+                    class="bg-white rounded-2xl p-6 lg:p-8 shadow-lg shadow-primary/10"
+                >
+                    <div class="space-y-2 mb-4">
+                        <h1
+                            class="text-3xl lg:text-4xl font-bold text-primary leading-tight"
+                        >
+                            {anime.title}
+                        </h1>
+                        {
+                            anime.title_english &&
+                                anime.title_english !== anime.title && (
+                                    <p class="text-xl text-secondary font-medium">
+                                        {anime.title_english}
+                                    </p>
+                                )
+                        }
+                        {
+                            anime.title_japanese && (
+                                <p class="text-lg text-secondary/70 italic">
+                                    {anime.title_japanese}
+                                </p>
+                            )
+                        }
+                    </div>
+
+                    {/* Badges */}
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span
+                            class="px-3 py-1.5 bg-primary/5 text-primary rounded-full text-sm font-medium"
+                        >
+                            {anime.type}
+                        </span>
+                        <span
+                            class="px-3 py-1.5 bg-primary/5 text-primary rounded-full text-sm font-medium"
+                        >
+                            {anime.status}
+                        </span>
+                        {
+                            anime.season && anime.year && (
+                                <span class="px-3 py-1.5 bg-primary/5 text-primary rounded-full text-sm font-medium capitalize">
+                                    {anime.season} {anime.year}
+                                </span>
+                            )
+                        }
+                        <span
+                            class="px-3 py-1.5 bg-primary/5 text-primary rounded-full text-sm font-medium"
+                        >
+                            {anime.rating}
+                        </span>
+                    </div>
+
+                    {/* Synopsis */}
+                    <div class="prose prose-gray max-w-none">
+                        <h2 class="text-xl font-bold text-primary mb-3">
+                            Synopsis
+                        </h2>
+                        <p class="text-secondary leading-relaxed text-base">
+                            {anime.synopsis || "No synopsis available."}
+                        </p>
+                    </div>
+
+                    {
+                        anime.background && (
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <h3 class="text-lg font-bold text-primary mb-2">
+                                    Background
+                                </h3>
+                                <p class="text-secondary leading-relaxed text-sm">
+                                    {anime.background}
+                                </p>
+                            </div>
+                        )
+                    }
+                </div>
+
+                {/* Information Grid */}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10"
+                    >
+                        <h3
+                            class="font-bold text-lg text-primary mb-4 flex items-center gap-2"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-secondary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                            Information
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Episodes</span>
+                                <span class="font-medium text-primary"
+                                    >{anime.episodes || "Unknown"}</span
+                                >
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Duration</span>
+                                <span class="font-medium text-primary"
+                                    >{anime.duration || "Unknown"}</span
+                                >
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Source</span>
+                                <span
+                                    class="font-medium text-primary capitalize"
+                                    >{anime.source || "Unknown"}</span
+                                >
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Aired</span>
+                                <span class="font-medium text-primary">
+                                    {anime.aired.prop.string || "Unknown"}
+                                </span>
+                            </div>
+                            {
+                                anime.broadcast?.string && (
+                                    <div class="flex justify-between">
+                                        <span class="text-secondary">
+                                            Broadcast
+                                        </span>
+                                        <span class="font-medium text-primary">
+                                            {anime.broadcast.string}
+                                        </span>
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+
+                    {/* Studios & Producers */}
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10"
+                    >
+                        <h3
+                            class="font-bold text-lg text-primary mb-4 flex items-center gap-2"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-secondary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                ></path>
+                            </svg>
+                            Studios & Producers
+                        </h3>
+                        <div class="space-y-4">
+                            {
+                                anime.studios && anime.studios.length > 0 && (
+                                    <div>
+                                        <span class="text-secondary text-sm block mb-2">
+                                            Studios
+                                        </span>
+                                        <div class="flex flex-wrap gap-2">
+                                            {anime.studios.map((studio) => (
+                                                <a
+                                                    href={studio.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
+                                                >
+                                                    {studio.name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+                            {
+                                anime.producers &&
+                                    anime.producers.length > 0 && (
+                                        <div>
+                                            <span class="text-secondary text-sm block mb-2">
+                                                Producers
+                                            </span>
+                                            <div class="flex flex-wrap gap-2">
+                                                {anime.producers
+                                                    .slice(0, 3)
+                                                    .map((producer) => (
+                                                        <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                                                            {producer.name}
+                                                        </span>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )
+                            }
+                            {
+                                anime.licensors &&
+                                    anime.licensors.length > 0 && (
+                                        <div>
+                                            <span class="text-secondary text-sm block mb-2">
+                                                Licensors
+                                            </span>
+                                            <div class="flex flex-wrap gap-2">
+                                                {anime.licensors.map(
+                                                    (licensor) => (
+                                                        <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                                                            {licensor.name}
+                                                        </span>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                {/* Genres */}
+                {
+                    anime.genres && anime.genres.length > 0 && (
+                        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10">
+                            <h3 class="font-bold text-lg text-primary mb-4 flex items-center gap-2">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 text-secondary"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                                    />
+                                </svg>
+                                Genres & Themes
+                            </h3>
+                            <div class="flex flex-wrap gap-2">
+                                {anime.genres.map((genre) => (
+                                    <a
+                                        href={genre.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="px-4 py-2 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-200"
+                                    >
+                                        {genre.name}
+                                    </a>
+                                ))}
+                                {anime.themes &&
+                                    anime.themes.map((theme) => (
+                                        <span class="px-4 py-2 bg-secondary/10 text-secondary rounded-xl text-sm font-medium">
+                                            {theme.name}
+                                        </span>
+                                    ))}
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Trailer */}
+                {
+                    anime.trailer?.embed_url && (
+                        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10">
+                            <h3 class="font-bold text-lg text-primary mb-4 flex items-center gap-2">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 text-secondary"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                Trailer
+                            </h3>
+                            <div class="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black">
+                                <iframe
+                                    src={anime.trailer.embed_url}
+                                    title={`${anime.title} Trailer`}
+                                    class="absolute inset-0 w-full h-full"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                    loading="lazy"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                                />
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Alternative Titles */}
+                {
+                    anime.title_synonyms && anime.title_synonyms.length > 0 && (
+                        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-primary/10">
+                            <h3 class="font-bold text-lg text-primary mb-4">
+                                Alternative Titles
+                            </h3>
+                            <ul class="space-y-2">
+                                {anime.title_synonyms.map((title) => (
+                                    <li class="text-secondary flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 bg-primary/40 rounded-full" />
+                                        {title}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    /* Animaciones adicionales */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Mejoras en la tipografía */
+    .prose p {
+        margin-bottom: 0;
+    }
+</style>

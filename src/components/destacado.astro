@@ -1,0 +1,94 @@
+---
+import { IconPlayerPlayFilled, IconBookmarkFilled } from "@tabler/icons-react";
+import { Image } from "astro:assets";
+import imgFondo from "/public/hero-anime-info.png";
+
+const destacado = {
+    nombre: "Your Name",
+    nombreJp: "君の名は。",
+    descripcion:
+        "Two strangers find themselves linked in a bizarre way. When a connection forms, will distance be the only thing to keep them apart?",
+    score: "9.3",
+    year: "2016",
+    genre: "Romance • Drama • Supernatural",
+};
+const { nombre, nombreJp, descripcion, score, year, genre } = destacado;
+---
+
+<article class="relative w-full overflow-hidden rounded-2xl my-6">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+        <Image
+            src={imgFondo}
+            width={1200}
+            height={675}
+            alt="Featured"
+            class="w-full h-full object-cover"
+        />
+        <!-- Gradient overlays -->
+        <div
+            class="absolute inset-0 bg-linear-to-r from-bg via-bg/80 to-transparent"
+        >
+        </div>
+        <div
+            class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-bg/40"
+        >
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div
+        class="relative z-10 flex flex-col justify-end px-8 py-16 min-h-[50dvh]"
+    >
+        <!-- Featured badge -->
+        <div class="flex items-center gap-3 mb-6">
+            <span
+                class="inline-flex items-center gap-1.5 bg-accent/15 text-accent text-xs font-semibold px-3 py-1 rounded-full border border-accent/20 backdrop-blur-sm"
+            >
+                <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"
+                ></span>
+                Featured
+            </span>
+            <span class="text-text-muted text-xs font-medium"
+                >{year} • {genre}</span
+            >
+        </div>
+
+        <!-- Title -->
+        <h1
+            class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-text-primary mb-2 max-w-xl leading-[1.1] tracking-tight"
+        >
+            {nombre}
+        </h1>
+        <p class="text-text-muted text-lg font-light mb-5 tracking-wide">
+            {nombreJp}
+        </p>
+
+        <!-- Description -->
+        <p
+            class="text-sm sm:text-base text-text-secondary mb-8 max-w-md leading-relaxed font-light"
+        >
+            {descripcion}
+        </p>
+
+        <!-- Score + Buttons -->
+        <div class="flex items-center gap-4">
+            <button
+                class="cursor-pointer group flex items-center gap-2 bg-accent hover:bg-accent/90 text-bg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)]"
+            >
+                <IconPlayerPlayFilled size={16} />
+                View Details
+            </button>
+            <button
+                class="cursor-pointer flex items-center gap-2 bg-transparent hover:bg-white/6 text-text-primary px-5 py-2.5 rounded-xl text-sm font-semibold border border-border hover:border-border-hover transition-all duration-300"
+            >
+                <IconBookmarkFilled size={16} />
+                Watchlist
+            </button>
+            <div class="hidden sm:flex items-center gap-2 ml-2">
+                <span class="text-accent font-bold text-lg">{score}</span>
+                <span class="text-text-muted text-xs">/10</span>
+            </div>
+        </div>
+    </div>
+</article>

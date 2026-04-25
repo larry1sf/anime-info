@@ -1,0 +1,39 @@
+---
+import { getWatchRecentEpisodes } from "@/service/getAnime";
+import Card from "@/components/anime/card";
+
+const { data: episodes } = await getWatchRecentEpisodes();
+---
+
+<section class="py-14 space-y-6">
+    <h3 class="section-title">Latest Episodes</h3>
+
+    <section class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-5">
+        {
+            episodes
+                ?.slice(0, 8)
+                ?.map(({ entry: { title, images }, episodes }, i) => (
+                    <Card
+                        index={i}
+                        title={title}
+                        image={images.webp.image_url}
+                        badge={`${episodes?.length || 0} ep`}
+                    >
+                        {episodes && episodes.length > 0 && (
+                            <div class="space-y-1">
+                                <p class="text-xs text-text-secondary line-clamp-1">
+                                    <span class="text-accent font-medium">
+                                        Latest:
+                                    </span>{" "}
+                                    {episodes[0].title}
+                                </p>
+                                <p class="text-[10px] text-text-muted">
+                                    {episodes[0].aired}
+                                </p>
+                            </div>
+                        )}
+                    </Card>
+                ))
+        }
+    </section>
+</section>

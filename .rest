@@ -1,0 +1,36 @@
+###
+@localUrl = http://localhost:4321
+POST {{localUrl}}/route
+Content-Type: application/json
+  
+{
+    "page": 1,
+    "query": "naruto",
+    "rating": "pg-13",
+    "type": "tv"
+}
+
+###  general
+@url = https://api.jikan.moe/v4
+GET {{url}}/anime/12/full
+
+
+### especifico
+GET {{url}}/anime/12
+
+### filtrado por producers
+GET {{url}}/anime?producers=18
+
+
+###
+@id = 13
+
+
+### Pictures characters
+GET {{url}}/characters/{{id}}/pictures
+
+### Generos 
+GET {{url}}/genres/manga
+
+### productoras 
+GET {{url}}/producers/18/full

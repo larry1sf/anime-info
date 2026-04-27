@@ -1,29 +1,35 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import type { Anime } from "@/types/anime";
 import { getAnimeById, getAnimeCharacters } from "@/service/getAnime";
 import CharactersList from "@/components/anime/characters";
+import Details from "@/components/anime/details";
+import WatchlistButton from "@/components/anime/WatchlistButton";
+
 export const prerender = false;
 const { section, id } = Astro.params;
 
 if (!section || (section !== "anime" && section !== "manga"))
     return Astro.redirect("/");
-
-if (!id || !Number(id)) return Astro.redirect("/");
+const userId = Number(id);
+if (!id || !userId) return Astro.redirect("/");
 
 const [response, charactersResponse] = await Promise.all([
-    getAnimeById(Number(id), section),
-    getAnimeCharacters(Number(id), section),
+    getAnimeById(userId, section),
+    getAnimeCharacters(userId, section),
 ]);
 
 if (!response.data) return Astro.redirect("/");
 
-const item = response.data as any;
+const item = response.data as Anime;
 const characters = charactersResponse.data ? charactersResponse.data : [];
 const isAnime = section === "anime";
 const imageUrl =
     item.images?.webp?.large_image_url ||
     item.images?.jpg?.large_image_url ||
     item.images?.jpg?.image_url;
+const relateds = item.relations || [];
+console.log(relateds[0].entry);
 ---
 
 <Layout title={item.title || "Detail"}>
@@ -62,6 +68,15 @@ const imageUrl =
                     >
                     </div>
                 </div>
+                <!-- button watchlist -->
+                <!-- <WatchlistButton
+                    id={userId}
+                    onToast={(message, type) => {
+                        console.log(message, type);
+                    }}
+                    section={section as "anime" | "manga"}
+                    client:visible
+                /> -->
 
                 <!-- Sidebar Information -->
                 <div
@@ -169,6 +184,9 @@ const imageUrl =
                         </li>
                     </ul>
                 </div>
+
+                <!-- related -->
+                <Details optionsDetails={relateds} client:visible />
             </div>
 
             {/* Right Column: Main Details */}

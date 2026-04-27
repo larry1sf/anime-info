@@ -12,88 +12,158 @@ if (!id || !Number(id)) return Astro.redirect("/");
 
 const [response, charactersResponse] = await Promise.all([
     getAnimeById(Number(id), section),
-    getAnimeCharacters(Number(id), section)
+    getAnimeCharacters(Number(id), section),
 ]);
 
-if (!response.data) {
-    return Astro.redirect("/");
-}
+if (!response.data) return Astro.redirect("/");
 
 const item = response.data as any;
 const characters = charactersResponse.data ? charactersResponse.data : [];
 const isAnime = section === "anime";
-const imageUrl = item.images?.webp?.large_image_url || item.images?.jpg?.large_image_url || item.images?.jpg?.image_url;
+const imageUrl =
+    item.images?.webp?.large_image_url ||
+    item.images?.jpg?.large_image_url ||
+    item.images?.jpg?.image_url;
 ---
 
 <Layout title={item.title || "Detail"}>
     <div class="pt-24 pb-16 animate-fade-in relative min-h-screen">
         {/* Backdrop for blur */}
-        <div class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none">
-            <img src={imageUrl} class="w-full h-full object-cover blur-[100px] scale-125" alt="" aria-hidden="true" />
+        <div
+            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none"
+        >
+            <img
+                src={imageUrl}
+                class="w-full h-full object-cover blur-[100px] scale-125"
+                alt=""
+                aria-hidden="true"
+            />
             <div class="absolute inset-0 bg-bg/80"></div>
-            <div class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent"></div>
+            <div
+                class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent"
+            >
+            </div>
         </div>
 
         <div class="flex flex-col lg:flex-row gap-10">
             {/* Left Column: Image & Info */}
             <div class="w-full lg:w-80 shrink-0 space-y-6">
                 <!-- Cover Image -->
-                <div class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 border border-border animate-fade-up relative group">
-                    <img src={imageUrl} alt={item.title} class="w-full aspect-3/4 object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div class="absolute inset-0 bg-linear-to-t from-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div
+                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 border border-border animate-fade-up relative group"
+                >
+                    <img
+                        src={imageUrl}
+                        alt={item.title}
+                        class="w-full aspect-3/4 object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div
+                        class="absolute inset-0 bg-linear-to-t from-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
+                    </div>
                 </div>
-                
+
                 <!-- Sidebar Information -->
-                <div class="glass rounded-2xl p-6 space-y-5 animate-fade-up" style="animation-delay: 0.1s">
+                <div
+                    class="glass rounded-2xl p-6 space-y-5 animate-fade-up"
+                    style="animation-delay: 0.1s"
+                >
                     <h3 class="section-title text-xl">Information</h3>
                     <ul class="text-sm space-y-4">
                         <li class="flex flex-col gap-1">
-                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Type</span>
-                            <span class="text-text-primary font-medium">{item.type || "Unknown"}</span>
+                            <span
+                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
+                                >Type</span
+                            >
+                            <span class="text-text-primary font-medium"
+                                >{item.type || "Unknown"}</span
+                            >
                         </li>
-                        {isAnime ? (
-                           <>
-                             <li class="flex flex-col gap-1">
-                                 <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Episodes</span>
-                                 <span class="text-text-primary font-medium">{item.episodes || "Unknown"}</span>
-                             </li>
-                             <li class="flex flex-col gap-1">
-                                 <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Aired</span>
-                                 <span class="text-text-primary font-medium">{item.aired?.string || "Unknown"}</span>
-                             </li>
-                             {item.studios && item.studios.length > 0 && (
-                                 <li class="flex flex-col gap-1">
-                                     <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Studios</span>
-                                     <span class="text-text-primary font-medium">{item.studios.map((s: any) => s.name).join(", ")}</span>
-                                 </li>
-                             )}
-                           </>
-                        ) : (
-                           <>
-                              <li class="flex flex-col gap-1">
-                                  <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Chapters</span>
-                                  <span class="text-text-primary font-medium">{item.chapters || "Unknown"}</span>
-                              </li>
-                              <li class="flex flex-col gap-1">
-                                  <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Volumes</span>
-                                  <span class="text-text-primary font-medium">{item.volumes || "Unknown"}</span>
-                              </li>
-                              <li class="flex flex-col gap-1">
-                                  <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Published</span>
-                                  <span class="text-text-primary font-medium">{item.published?.string || "Unknown"}</span>
-                              </li>
-                              {item.authors && item.authors.length > 0 && (
-                                 <li class="flex flex-col gap-1">
-                                     <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Authors</span>
-                                     <span class="text-text-primary font-medium">{item.authors.map((a: any) => a.name).join(", ")}</span>
-                                 </li>
-                             )}
-                           </>
-                        )}
+                        {
+                            isAnime ? (
+                                <>
+                                    <li class="flex flex-col gap-1">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Episodes
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {item.episodes || "Unknown"}
+                                        </span>
+                                    </li>
+                                    <li class="flex flex-col gap-1">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Aired
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {item.aired?.string || "Unknown"}
+                                        </span>
+                                    </li>
+                                    {item.studios &&
+                                        item.studios.length > 0 && (
+                                            <li class="flex flex-col gap-1">
+                                                <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                                    Studios
+                                                </span>
+                                                <span class="text-text-primary font-medium">
+                                                    {item.studios
+                                                        .map((s: any) => s.name)
+                                                        .join(", ")}
+                                                </span>
+                                            </li>
+                                        )}
+                                </>
+                            ) : (
+                                <>
+                                    <li class="flex flex-col gap-1">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Chapters
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {item.chapters || "Unknown"}
+                                        </span>
+                                    </li>
+                                    <li class="flex flex-col gap-1">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Volumes
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {item.volumes || "Unknown"}
+                                        </span>
+                                    </li>
+                                    <li class="flex flex-col gap-1">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Published
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {item.published?.string ||
+                                                "Unknown"}
+                                        </span>
+                                    </li>
+                                    {item.authors &&
+                                        item.authors.length > 0 && (
+                                            <li class="flex flex-col gap-1">
+                                                <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                                    Authors
+                                                </span>
+                                                <span class="text-text-primary font-medium">
+                                                    {item.authors
+                                                        .map((a: any) => a.name)
+                                                        .join(", ")}
+                                                </span>
+                                            </li>
+                                        )}
+                                </>
+                            )
+                        }
                         <li class="flex flex-col gap-1">
-                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">Status</span>
+                            <span
+                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
+                                >Status</span
+                            >
                             <span class="text-text-primary font-medium">
-                                <span class={`inline-block w-2 h-2 rounded-full mr-2 ${item.status?.toLowerCase().includes("finished") || item.status?.toLowerCase().includes("complete") ? "bg-green-500" : "bg-blue-500"}`}></span>
+                                <span
+                                    class={`inline-block w-2 h-2 rounded-full mr-2 ${item.status?.toLowerCase().includes("finished") || item.status?.toLowerCase().includes("complete") ? "bg-green-500" : "bg-blue-500"}`}
+                                ></span>
                                 {item.status || "Unknown"}
                             </span>
                         </li>
@@ -102,96 +172,177 @@ const imageUrl = item.images?.webp?.large_image_url || item.images?.jpg?.large_i
             </div>
 
             {/* Right Column: Main Details */}
-            <div class="flex-1 space-y-10 animate-fade-up" style="animation-delay: 0.2s">
+            <div
+                class="flex-1 space-y-10 animate-fade-up"
+                style="animation-delay: 0.2s"
+            >
                 <!-- Header -->
                 <header class="space-y-4">
                     <div class="flex flex-wrap gap-2 mb-4">
-                        {item.genres?.map((g: any) => (
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors cursor-default">
-                                {g.name}
-                            </span>
-                        ))}
+                        {
+                            item.genres?.map((g: any) => (
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors cursor-default">
+                                    {g.name}
+                                </span>
+                            ))
+                        }
                     </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-clip-text text-transparent bg-linear-to-r from-white via-text-primary to-text-secondary pb-2">
+                    <h1
+                        class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-clip-text text-transparent bg-linear-to-r from-white via-text-primary to-text-secondary pb-2"
+                    >
                         {item.title}
                     </h1>
-                    {item.title_japanese && (
-                         <h2 class="text-xl md:text-2xl text-text-muted font-medium tracking-wide">
-                             {item.title_japanese}
-                         </h2>
-                    )}
+                    {
+                        item.title_japanese && (
+                            <h2 class="text-xl md:text-2xl text-text-muted font-medium tracking-wide">
+                                {item.title_japanese}
+                            </h2>
+                        )
+                    }
                 </header>
 
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center group transition-transform hover:-translate-y-1">
-                        <span class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2">Score</span>
+                    <div
+                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center group transition-transform hover:-translate-y-1"
+                    >
+                        <span
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            >Score</span
+                        >
                         <div class="flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="text-amber-400 size-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="text-amber-400 size-5 group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                            >
+                                <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"></path>
+                                <path
+                                    d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z"
+                                ></path>
                             </svg>
-                            <span class="text-3xl font-black text-text-primary">{item.score || "N/A"}</span>
+                            <span class="text-3xl font-black text-text-primary"
+                                >{item.score || "N/A"}</span
+                            >
                         </div>
-                        {item.scored_by && <span class="text-text-muted text-[10px] mt-1">{item.scored_by.toLocaleString()} users</span>}
+                        {
+                            item.scored_by && (
+                                <span class="text-text-muted text-[10px] mt-1">
+                                    {item.scored_by.toLocaleString()} users
+                                </span>
+                            )
+                        }
                     </div>
-                    
-                    <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1">
-                        <span class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2">Rank</span>
-                        <span class="text-3xl font-black text-text-primary">#{item.rank || "N/A"}</span>
+
+                    <div
+                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
+                    >
+                        <span
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            >Rank</span
+                        >
+                        <span class="text-3xl font-black text-text-primary"
+                            >#{item.rank || "N/A"}</span
+                        >
                     </div>
-                    
-                    <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1">
-                        <span class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2">Popularity</span>
-                        <span class="text-3xl font-black text-text-primary">#{item.popularity || "N/A"}</span>
+
+                    <div
+                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
+                    >
+                        <span
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            >Popularity</span
+                        >
+                        <span class="text-3xl font-black text-text-primary"
+                            >#{item.popularity || "N/A"}</span
+                        >
                     </div>
-                    
-                    <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1">
-                        <span class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2">Members</span>
-                        <span class="text-3xl font-black text-text-primary">{item.members ? (item.members > 1000000 ? (item.members/1000000).toFixed(1) + 'M' : (item.members/1000).toFixed(0) + 'K') : "N/A"}</span>
+
+                    <div
+                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
+                    >
+                        <span
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            >Members</span
+                        >
+                        <span class="text-3xl font-black text-text-primary"
+                            >{
+                                item.members
+                                    ? item.members > 1000000
+                                        ? (item.members / 1000000).toFixed(1) +
+                                          "M"
+                                        : (item.members / 1000).toFixed(0) + "K"
+                                    : "N/A"
+                            }</span
+                        >
                     </div>
                 </div>
 
                 <!-- Synopsis Text -->
-                {item.synopsis && (
-                    <section class="space-y-5 animate-fade-up" style="animation-delay: 0.3s">
-                        <h3 class="section-title text-2xl font-bold">Synopsis</h3>
-                        <div class="glass p-6 md:p-8 rounded-2xl">
-                            <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
-                                {item.synopsis}
-                            </p>
-                        </div>
-                    </section>
-                )}
+                {
+                    item.synopsis && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.3s"
+                        >
+                            <h3 class="section-title text-2xl font-bold">
+                                Synopsis
+                            </h3>
+                            <div class="glass p-6 md:p-8 rounded-2xl">
+                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
+                                    {item.synopsis}
+                                </p>
+                            </div>
+                        </section>
+                    )
+                }
 
                 <!-- Background Text -->
-                {item.background && (
-                    <section class="space-y-5 animate-fade-up" style="animation-delay: 0.4s">
-                        <h3 class="section-title text-2xl font-bold">Background</h3>
-                        <div class="glass p-6 md:p-8 rounded-2xl">
-                            <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
-                                {item.background}
-                            </p>
-                        </div>
-                    </section>
-                )}
+                {
+                    item.background && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.4s"
+                        >
+                            <h3 class="section-title text-2xl font-bold">
+                                Background
+                            </h3>
+                            <div class="glass p-6 md:p-8 rounded-2xl">
+                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
+                                    {item.background}
+                                </p>
+                            </div>
+                        </section>
+                    )
+                }
 
                 <!-- Trailer Video -->
-                {isAnime && item.trailer?.youtube_id && (
-                    <section class="space-y-5 animate-fade-up" style="animation-delay: 0.5s">
-                        <h3 class="section-title text-2xl font-bold">Trailer</h3>
-                        <div class="aspect-video w-full rounded-2xl overflow-hidden glass p-2 shadow-2xl shadow-accent/5">
-                            <iframe 
-                                class="w-full h-full rounded-xl"
-                                src={`https://www.youtube.com/embed/${item.trailer.youtube_id}`} 
-                                title={`${item.title} Trailer`}
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowfullscreen>
-                            </iframe>
-                        </div>
-                    </section>
-                )}
+                {
+                    isAnime && item.trailer?.youtube_id && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.5s"
+                        >
+                            <h3 class="section-title text-2xl font-bold">
+                                Trailer
+                            </h3>
+                            <div class="aspect-video w-full rounded-2xl overflow-hidden glass p-2 shadow-2xl shadow-accent/5">
+                                <iframe
+                                    class="w-full h-full rounded-xl"
+                                    src={`https://www.youtube.com/embed/${item.trailer.youtube_id}`}
+                                    title={`${item.title} Trailer`}
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
+                        </section>
+                    )
+                }
 
                 {/* Characters Section */}
                 <CharactersList characters={characters} client:visible />

@@ -75,7 +75,7 @@ export default function CharactersList({ characters }: { characters: any[] }) {
         {visibleCharacters.map((char: any, index: number) => (
           <article
             key={char.character.mal_id + "-" + index}
-            className="glass rounded-2xl p-2 flex flex-col gap-3 group hover:-translate-y-1 transition-transform border border-border/50 hover:border-accent/40 shadow-xl shadow-transparent hover:shadow-accent/10 transition-700"
+            className="glass rounded-2xl p-2 flex flex-col gap-3 group hover:-translate-y-1  border border-border/50 hover:border-accent/40 shadow-xl shadow-transparent hover:shadow-accent/10 transition-all duration-600"
           >
             <div className="relative w-full aspect-3/4 overflow-hidden rounded-xl">
               <img

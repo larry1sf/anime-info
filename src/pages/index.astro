@@ -1,14 +1,15 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Destacado from "@/components/destacado.astro";
+import AnimeHero from "@/components/hero.astro";
+import AnimeTops from "@/components/top.astro";
 import Section from "@/components/anime/section";
-import UltimosAnimes from "@/components/ultimos-animes.astro";
-import TopTendencias from "@/components/top-tendencias.astro";
+import AnimesRecientes from "@/components/recientes.astro";
 ---
 
 <Layout title="Find information about your favorite anime">
-    <Destacado />
-    <TopTendencias />
+    <AnimeHero />
+    <AnimeTops />
+    <AnimesRecientes/>
     <Section client:visible />
-    <!-- <UltimosAnimes/> -->
+
 </Layout>

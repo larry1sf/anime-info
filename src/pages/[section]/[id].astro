@@ -29,6 +29,9 @@ const imageUrl =
     item.images?.jpg?.large_image_url ||
     item.images?.jpg?.image_url;
 const relateds = item.relations || [];
+
+const fecha = new Date(item.aired?.from);
+const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 ---
 
 <Layout title={item.title || "Detail"}>
@@ -68,7 +71,11 @@ const relateds = item.relations || [];
                     </div>
                 </div>
                 <!-- button watchlist -->
-                <WatchlistButton client:visible />
+                <WatchlistButton
+                    id={userId}
+                    section={section as "anime" | "manga"}
+                    client:visible
+                />
                 <!-- <WatchlistButton
                     id={userId}
                     onToast={(message, type) => {
@@ -110,7 +117,7 @@ const relateds = item.relations || [];
                                             Aired
                                         </span>
                                         <span class="text-text-primary font-medium">
-                                            {item.aired?.string || "Unknown"}
+                                            {fechaFormateada || "Unknown"}
                                         </span>
                                     </li>
                                     {item.studios &&

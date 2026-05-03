@@ -19,6 +19,7 @@ const filtersInitial = {
   type: { slug: "", label: "All" },
   status: { slug: "", label: "All" },
 };
+
 export default function Section() {
   const [tab, setTab] = useState(optionsViews[0].slug);
 
@@ -82,7 +83,13 @@ export default function Section() {
         setIsLoading(false);
       }
     },
-    [filters.status.slug, filters.rating.slug, filters.type.slug, tab, debouncedQuery],
+    [
+      filters.status.slug,
+      filters.rating.slug,
+      filters.type.slug,
+      tab,
+      debouncedQuery,
+    ],
   );
 
   const [isLoading, setIsLoading] = useState(false);
@@ -128,7 +135,7 @@ export default function Section() {
   };
 
   return (
-    <section className="space-y-8 pt-14 pb-6 min-h-dvh">
+    <section className="space-y-8 pt-14 min-h-dvh">
       {/* Header with title + controls */}
       <article className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         {/* Tab switcher */}
@@ -139,10 +146,11 @@ export default function Section() {
               <button
                 key={option.slug}
                 type="button"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${option.slug === tab
-                  ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
-                  : "text-text-muted hover:text-text-primary hover:bg-white/4"
-                  }`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
+                  option.slug === tab
+                    ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
+                    : "text-text-muted hover:text-text-primary hover:bg-white/4"
+                }`}
                 onClick={() => handleChangeTab(option.slug)}
               >
                 {option.icon}
@@ -158,10 +166,11 @@ export default function Section() {
           <button
             type="button"
             onClick={toggleSearchMode}
-            className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl border cursor-pointer transition-all duration-300 ${isSearchMode
-              ? "bg-accent border-accent/30 text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
-              : "bg-surface border-border text-text-muted hover:text-text-primary hover:border-border-hover"
-              }`}
+            className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl border cursor-pointer transition-all duration-300 ${
+              isSearchMode
+                ? "bg-accent border-accent/30 text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
+                : "bg-surface border-border text-text-muted hover:text-text-primary hover:border-border-hover"
+            }`}
             title={isSearchMode ? "Volver a filtros" : "Buscar por nombre"}
           >
             {isSearchMode ? <IconX size={16} /> : <IconSearch size={16} />}
@@ -171,10 +180,11 @@ export default function Section() {
           <div className="relative min-w-[16rem] sm:min-w-md h-15">
             {/* --- Selects (filters mode) --- */}
             <nav
-              className={`absolute inset-0 flex items-end gap-3 transition-all duration-300 ease-in-out ${isSearchMode
-                ? "opacity-0 scale-95 pointer-events-none"
-                : "opacity-100 scale-100"
-                }`}
+              className={`absolute inset-0 flex items-end gap-3 transition-all duration-300 ease-in-out ${
+                isSearchMode
+                  ? "opacity-0 scale-95 pointer-events-none"
+                  : "opacity-100 scale-100"
+              }`}
             >
               <Select
                 selected={filters.rating}
@@ -204,10 +214,11 @@ export default function Section() {
 
             {/* --- Search input (search mode) --- */}
             <div
-              className={`absolute inset-0 flex flex-col justify-end gap-1.5 transition-all duration-300 ease-in-out ${isSearchMode
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-95 pointer-events-none"
-                }`}
+              className={`absolute inset-0 flex flex-col justify-end gap-1.5 transition-all duration-300 ease-in-out ${
+                isSearchMode
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
             >
               <label className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
                 Search
@@ -235,39 +246,46 @@ export default function Section() {
       <section className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-5">
         {isLoading
           ? Array(LIMIT_ANIME)
-            .fill({})
-            .map((_, i) => (
-              <Card key={i} id={i} title={""} rating={""} image={""} index={i}>
+              .fill({})
+              .map((_, i) => (
+                <Card
+                  key={i}
+                  id={i}
+                  title={""}
+                  rating={""}
+                  image={""}
+                  index={i}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {/*<IconLoader2 size={14} className="animate-spin" />*/}
+                    <span className="text-xs h-4 bg-text-muted animate-pulse rounded w-2/4 uppercase tracking-wider font-medium">
+                      {/*{anime.type}*/}
+                    </span>
+                  </div>
+                </Card>
+              ))
+          : dataAnimes?.map((anime, i) => (
+              <Card
+                id={anime.mal_id}
+                key={anime.mal_id}
+                title={anime.title}
+                rating={anime.rating}
+                image={anime.images.webp.image_url}
+                section={tab}
+                index={i}
+              >
                 <div className="flex items-center gap-1.5">
-                  {/*<IconLoader2 size={14} className="animate-spin" />*/}
-                  <span className="text-xs h-4 bg-text-muted animate-pulse rounded w-2/4 uppercase tracking-wider font-medium">
-                    {/*{anime.type}*/}
+                  {anime.type === "anime" ? (
+                    <IconDeviceTv size={12} className="text-accent" />
+                  ) : (
+                    <IconBook size={12} className="text-accent-pink" />
+                  )}
+                  <span className="text-xs text-text-muted uppercase tracking-wider font-medium">
+                    {anime.type}
                   </span>
                 </div>
               </Card>
-            ))
-          : dataAnimes?.map((anime, i) => (
-            <Card
-              id={anime.mal_id}
-              key={anime.mal_id}
-              title={anime.title}
-              rating={anime.rating}
-              image={anime.images.webp.image_url}
-              section={tab}
-              index={i}
-            >
-              <div className="flex items-center gap-1.5">
-                {anime.type === "anime" ? (
-                  <IconDeviceTv size={12} className="text-accent" />
-                ) : (
-                  <IconBook size={12} className="text-accent-pink" />
-                )}
-                <span className="text-xs text-text-muted uppercase tracking-wider font-medium">
-                  {anime.type}
-                </span>
-              </div>
-            </Card>
-          ))}
+            ))}
       </section>
 
       <div className="mt-4">

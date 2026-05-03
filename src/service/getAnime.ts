@@ -503,6 +503,7 @@ export async function getAnimeById(id: number, section: string = "anime") {
     }
     return {
       ...resDefault,
+
       error: {
         message: `No se recibieron datos de la api en la url: ${url}`,
         status: 404,

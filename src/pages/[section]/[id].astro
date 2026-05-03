@@ -4,7 +4,7 @@ import type { Anime } from "@/types/anime";
 import { getAnimeById, getAnimeCharacters } from "@/service/getAnime";
 import CharactersList from "@/components/anime/characters";
 import Details from "@/components/anime/details";
-import WatchlistButton from "@/components/anime/WatchlistButton";
+import WatchlistButton from "@/components/anime/watch-list";
 
 export const prerender = false;
 const { section, id } = Astro.params;
@@ -29,7 +29,6 @@ const imageUrl =
     item.images?.jpg?.large_image_url ||
     item.images?.jpg?.image_url;
 const relateds = item.relations || [];
-console.log(relateds[0].entry);
 ---
 
 <Layout title={item.title || "Detail"}>
@@ -69,6 +68,7 @@ console.log(relateds[0].entry);
                     </div>
                 </div>
                 <!-- button watchlist -->
+                <WatchlistButton client:visible />
                 <!-- <WatchlistButton
                     id={userId}
                     onToast={(message, type) => {

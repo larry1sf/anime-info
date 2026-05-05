@@ -73,7 +73,7 @@ export async function getCharacterFullById(id: number) {
       };
     }
     const json = (await res.json()) as {
-      data: import("@/types/anime").CharacterFull;
+      data: import("@/types/character").CharacterFull;
     };
     if (json && json.data) {
       return {
@@ -114,7 +114,7 @@ export async function getCharacterPicturesById(id: number) {
       };
     }
     const json = (await res.json()) as {
-      data: import("@/types/anime").CharacterPicture[];
+      data: import("@/types/character").CharacterPicture[];
     };
     if (json && json.data) {
       return {

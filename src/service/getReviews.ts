@@ -2,6 +2,7 @@ import { API_URL } from "@/const";
 
 const resDefault = {
   data: null,
+  pagination: null,
   error: {
     message: "No hubo ningún error",
     status: 200,

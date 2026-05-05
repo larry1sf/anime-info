@@ -1,5 +1,4 @@
-import pkg from "react";
-const { Component, ReactNode } = pkg;
+import { Component, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

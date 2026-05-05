@@ -3,7 +3,8 @@ import Select from "@/components/character/select";
 import CharacterCard from "@/components/character/card";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { IconUser, IconSearch, IconX } from "@tabler/icons-react";
-import type { Character, PaginationParse, FilterOption } from "@/types/character";
+import type { Character, FilterOption } from "@/types/character";
+import type { PaginationParse } from "@/types/index";
 
 const filtersInitial = {
   order_by: { slug: "mal_id", label: "MAL ID" },
@@ -270,11 +271,7 @@ export default function CharacterSection() {
                   favorites={0}
                   image={""}
                   index={i}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs h-4 bg-text-muted animate-pulse rounded w-2/4 uppercase tracking-wider font-medium"></span>
-                  </div>
-                </CharacterCard>
+                />
               ))
           : dataCharacters.length === 0
             ? (

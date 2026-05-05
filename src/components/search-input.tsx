@@ -51,7 +51,7 @@ function SearchSection({ title, results, visibleCount, onShowMore, onSelect }: S
         {visibleResults.map((result) => (
           <button
             key={result.mal_id}
-            onClick={() => onSelect(result)}
+            onClick={() => onSelect(result as SearchResult & { _type: string })}
             className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent/8 hover:shadow-[0_0_12px_-4px_rgba(167,139,250,0.15)] transition-all duration-300 text-left group"
           >
             <div className="relative overflow-hidden rounded-lg">

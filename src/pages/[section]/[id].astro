@@ -1,12 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import type { Anime } from "@/types/anime";
-import { getAnimeById, getAnimeCharacters } from "@/service/getAnime";
+import { getAnimeById } from "@/service/getAnime";
+import { getAnimeCharacters } from "@/service/getCharacters";
 import CharactersList from "@/components/anime/characters";
 import Details from "@/components/anime/details";
 import WatchlistButton from "@/components/anime/watch-list";
 
-export const prerender = false;
 const { section, id } = Astro.params;
 
 if (!section || (section !== "anime" && section !== "manga"))
@@ -29,13 +29,10 @@ const imageUrl =
     item.images?.jpg?.large_image_url ||
     item.images?.jpg?.image_url;
 const relateds = item.relations || [];
-
-const fecha = new Date(item.aired?.from);
-const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 ---
 
 <Layout title={item.title || "Detail"}>
-    <div class="pt-24 pb-16 animate-fade-in relative min-h-screen">
+    <div class="pt-24 pb- animate-fade-in relative min-h-screen">
         {/* Backdrop for blur */}
         <div
             class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none"
@@ -72,19 +69,10 @@ const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', mon
                 </div>
                 <!-- button watchlist -->
                 <WatchlistButton
-                    id={userId}
+                    anime={item}
                     section={section as "anime" | "manga"}
                     client:visible
                 />
-                <!-- <WatchlistButton
-                    id={userId}
-                    onToast={(message, type) => {
-                        console.log(message, type);
-                    }}
-                    section={section as "anime" | "manga"}
-                    client:visible
-                /> -->
-
                 <!-- Sidebar Information -->
                 <div
                     class="glass rounded-2xl p-6 space-y-5 animate-fade-up"
@@ -117,7 +105,7 @@ const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', mon
                                             Aired
                                         </span>
                                         <span class="text-text-primary font-medium">
-                                            {fechaFormateada || "Unknown"}
+                                            {item.aired?.string || "Unknown"}
                                         </span>
                                     </li>
                                     {item.studios &&
@@ -198,7 +186,7 @@ const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', mon
 
             {/* Right Column: Main Details */}
             <div
-                class="flex-1 space-y-10 animate-fade-up"
+                class="flex-1 space-y-6 animate-fade-up"
                 style="animation-delay: 0.2s"
             >
                 <!-- Header -->
@@ -314,10 +302,10 @@ const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', mon
                             class="space-y-5 animate-fade-up"
                             style="animation-delay: 0.3s"
                         >
-                            <h3 class="section-title text-2xl font-bold">
-                                Synopsis
-                            </h3>
                             <div class="glass p-6 md:p-8 rounded-2xl">
+                                <h3 class="section-title text-2xl mb-4 font-bold">
+                                    Synopsis
+                                </h3>
                                 <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
                                     {item.synopsis}
                                 </p>
@@ -336,7 +324,7 @@ const fechaFormateada = fecha.toLocaleDateString('en-US', { year: 'numeric', mon
                             <h3 class="section-title text-2xl font-bold">
                                 Background
                             </h3>
-                            <div class="glass p-6 md:p-8 rounded-2xl">
+                            <div class="glass p-6  rounded-2xl">
                                 <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
                                     {item.background}
                                 </p>

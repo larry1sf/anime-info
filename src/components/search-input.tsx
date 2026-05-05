@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { IconSearch, IconLoader2, IconChevronDown } from "@tabler/icons-react";
+import { formatNumber } from "@/const";
 
 interface SearchResult {
   mal_id: number;
@@ -115,11 +116,6 @@ function CharacterSection({
   const visibleResults = results.slice(0, visibleCount);
   const hasMore = visibleCount < results.length;
 
-  const formatFavorites = (num: number) => {
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
-    return num.toString();
-  };
-
   return (
     <div>
       <div className="sticky top-0 z-10 bg-surface-elevated border-b border-border/40 px-4 py-2 flex items-center justify-between">
@@ -162,7 +158,7 @@ function CharacterSection({
                   Character
                 </span>
                 <span className="flex items-center gap-0.5">
-                  ❤️ {formatFavorites(result.favorites)}
+                  ❤️ {formatNumber(result.favorites)}
                 </span>
               </p>
             </div>

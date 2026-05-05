@@ -1,13 +1,14 @@
 ---
-import { IconSearch } from "@tabler/icons-react";
 import IconPage from "@/components/icon-page.astro";
+import SearchInput from "@/components/search-input";
+import ThemeToggle from "@/components/theme-toggle";
 
 const path = Astro.url.pathname;
 const enlaces = [
     { href: "/", texto: "Home" },
     { href: "/watchlist", texto: "Watchlist" },
-    { href: "/seasons", texto: "Seasons" },
-    { href: "/news", texto: "News" },
+    { href: "/characters", texto: "Characters" },
+    { href: "/reviews", texto: "Reviews" },
 ];
 ---
 
@@ -39,19 +40,7 @@ const enlaces = [
 
         <div class="flex-1"></div>
 
-        <form
-            class="hidden sm:flex items-center gap-2 bg-white/4 rounded-xl overflow-hidden border border-border hover:border-border-hover transition-colors duration-300 focus-within:border-accent/30 focus-within:bg-white/6"
-        >
-            <input
-                aria-label="Search"
-                placeholder="Search anime or manga..."
-                class="text-sm w-56 focus:outline-none px-4 py-2.5 bg-transparent text-text-primary placeholder:text-text-muted"
-            />
-            <button
-                class="px-3 py-2.5 text-text-muted hover:text-accent transition-colors cursor-pointer"
-            >
-                <IconSearch size={18} />
-            </button>
-        </form>
+        <ThemeToggle client:load />
+        <SearchInput client:load />
     </div>
 </header>

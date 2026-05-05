@@ -79,12 +79,14 @@ const { nombre, nombreJp, descripcion, score, year, genre } = destacado;
                 <IconPlayerPlayFilled size={16} />
                 View Details
             </button>
-            <button
+            <a
+href="watchlist"
+title="Go to Watch List"
                 class="cursor-pointer flex items-center gap-2 bg-transparent hover:bg-white/6 text-text-primary px-5 py-2.5 rounded-xl text-sm font-semibold border border-border hover:border-border-hover transition-all duration-300"
             >
                 <IconBookmarkFilled size={16} />
                 Watchlist
-            </button>
+            </a>
             <div class="hidden sm:flex items-center gap-2 ml-2">
                 <span class="text-accent font-bold text-lg">{score}</span>
                 <span class="text-text-muted text-xs">/10</span>

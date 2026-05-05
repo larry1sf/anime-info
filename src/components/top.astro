@@ -3,22 +3,19 @@ import { getTopAnime } from "@/service/getAnime";
 import Card from "@/components/anime/card";
 
 const { data: animes } = await getTopAnime();
-
 ---
 
 <section class="py-14 space-y-6">
     <h3 class="section-title">Top Trending</h3>
     <section class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-5">
-        {
-            animes?.map((anime, i) => (
-                <Card
-                    id={anime.mal_id}
-                    index={i}
-                    title={anime.title}
-                    image={anime.images.webp.image_url}
-                    rating={anime.rating}
-                />
-            ))
-        }
+        {animes?.map((anime, i) => (
+            <Card
+                id={anime.mal_id}
+                index={i}
+                title={anime.title}
+                image={anime.images.webp.image_url}
+                rating={anime.rating}
+            />
+        ))}
     </section>
 </section>

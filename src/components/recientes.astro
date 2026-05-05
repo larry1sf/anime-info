@@ -9,28 +9,16 @@ const { data: recents } = await getWatchRecentEpisodes();
     <h3 class="section-title">Latest Episodes</h3>
 
     <section class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-5">
-        {
-        recents
-                ?.slice(0, 8)
-                ?.map(({ title,entry: { title:entryTitle, images,id} ,episodes}, i) => (
-                    <Card
-                    id={id}
-                        index={i}
-                        title={entryTitle}
-                        image={images.webp.image_url}
-                    >
-                        {episodes  && (
-                            <div class="space-y-1">
-                                <p class="text-xs text-text-secondary line-clamp-1">
-                                    <span class="text-accent font-medium">
-                                        Latest:
-                                    </span>{" "}
-                                    {title}
-                                </p>
-                            </div>
-                        )}
-                    </Card>
-                ))
-        }
+        {recents?.slice(0, 8)?.map(({ title, entry: { title: entryTitle, images, id }, episodes }, i) => (
+            <Card id={id} index={i} title={entryTitle} image={images.webp.image_url}>
+                {episodes && (
+                    <div class="space-y-1">
+                        <p class="text-xs text-text-secondary line-clamp-1">
+                            <span class="text-accent font-medium">Latest:</span> {title}
+                        </p>
+                    </div>
+                )}
+            </Card>
+        ))}
     </section>
 </section>

@@ -1,0 +1,55 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = false;
+
+interface Props {
+  error?: Error;
+}
+
+const { error } = Astro.props;
+---
+
+<Layout title="500 - Server Error">
+  <div class="min-h-screen flex items-center justify-center pt-24">
+    <div class="text-center space-y-6 max-w-lg px-4">
+      <div class="relative inline-block">
+        <span class="text-[150px] font-black text-text-muted/20 leading-none">500</span>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h1 class="text-3xl font-bold text-text-primary">Server Error</h1>
+        <p class="text-text-muted text-lg">
+          Something went wrong on our end. Please try again later.
+        </p>
+        {error && (
+          <p class="text-sm text-text-muted/60 font-mono bg-surface-elevated p-3 rounded-lg">
+            {error.message}
+          </p>
+        )}
+      </div>
+
+      <div class="flex items-center justify-center gap-4 pt-4">
+        <a
+          href="/"
+          class="px-6 py-3 bg-accent hover:bg-accent/90 text-bg font-semibold rounded-xl transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)]"
+        >
+          Go Home
+        </a>
+        <button
+          onclick="window.location.reload()"
+          class="px-6 py-3 bg-surface border border-border hover:border-border-hover text-text-primary font-semibold rounded-xl transition-all duration-300"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,37 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = false;
+---
+
+<Layout title="404 - Not Found">
+  <div class="min-h-screen flex items-center justify-center pt-24">
+    <div class="text-center space-y-6 max-w-lg px-4">
+      <div class="relative inline-block">
+        <span class="text-[150px] font-black text-text-muted/20 leading-none">404</span>
+      </div>
+
+      <div class="space-y-3">
+        <h1 class="text-3xl font-bold text-text-primary">Page Not Found</h1>
+        <p class="text-text-muted text-lg">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 pt-4">
+        <a
+          href="/"
+          class="px-6 py-3 bg-accent hover:bg-accent/90 text-bg font-semibold rounded-xl transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)]"
+        >
+          Go Home
+        </a>
+        <a
+          href="/characters"
+          class="px-6 py-3 bg-surface border border-border hover:border-border-hover text-text-primary font-semibold rounded-xl transition-all duration-300"
+        >
+          Browse Characters
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

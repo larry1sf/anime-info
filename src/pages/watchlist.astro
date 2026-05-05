@@ -1,0 +1,8 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Section from "@/components/anime/section";
+---
+
+<Layout title="My Watchlist">
+    <Section client:visible watchListMode={true} />
+</Layout>

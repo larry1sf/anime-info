@@ -1,0 +1,472 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {
+    getCharacterFullById,
+    getCharacterAnime,
+    getCharacterManga,
+} from "@/service/getCharacters";
+import { formatNumber } from "@/const";
+
+const { id } = Astro.params;
+
+if (!id) return Astro.redirect("/characters");
+
+const userId = Number(id);
+if (!userId || isNaN(userId)) return Astro.redirect("/characters");
+
+const [characterResponse, animeResponse, mangaResponse] = await Promise.all([
+    getCharacterFullById(userId),
+    getCharacterAnime(userId),
+    getCharacterManga(userId),
+]);
+
+if (!characterResponse.data) {
+    return Astro.redirect("/characters");
+}
+
+const character = characterResponse.data;
+const animeRoles = animeResponse.data || [];
+const mangaRoles = mangaResponse.data || [];
+const imageUrl =
+    character.images?.webp?.image_url || character.images?.jpg?.image_url || "";
+
+interface ParsedInfo {
+    [key: string]: string;
+}
+
+interface ParsedCategories {
+    appearance: ParsedInfo;
+    background: ParsedInfo;
+    other: ParsedInfo;
+}
+
+function parseCharacterAbout(about: string | null): {
+    categories: ParsedCategories;
+    cleanAbout: string;
+} {
+    if (!about)
+        return {
+            categories: { appearance: {}, background: {}, other: {} },
+            cleanAbout: "",
+        };
+
+    const appearance: ParsedInfo = {};
+    const background: ParsedInfo = {};
+    const other: ParsedInfo = {};
+    const descriptionLines: string[] = [];
+
+    const lines = about.split(/\n/);
+
+    const appearanceKeys = [
+        "height",
+        "weight",
+        "hair color",
+        "eyecolor",
+        "eye color",
+        "bwh",
+        "blood type",
+        "bloodtype",
+    ];
+    const backgroundKeys = [
+        "occupation",
+        "affiliation",
+        "class",
+        "year",
+        "grade",
+        "origin",
+        "residence",
+        "species",
+        "first appearance",
+    ];
+
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        if (!trimmedLine) continue;
+
+        const colonIndex = trimmedLine.indexOf(":");
+
+        if (colonIndex > 0) {
+            const key = trimmedLine.slice(0, colonIndex).trim();
+            const value = trimmedLine.slice(colonIndex + 1).trim();
+            const keyLower = key.toLowerCase();
+
+            const trimmedValue = value.trim();
+            if (trimmedValue.length === 0) continue;
+
+            const isProperCaseKey = key.match(/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/);
+            const isKnownKey =
+                [...appearanceKeys, ...backgroundKeys].some((k) =>
+                    keyLower.includes(k),
+                ) ||
+                [
+                    "age",
+                    "birthday",
+                    "birthdate",
+                    "gender",
+                    "zodiac",
+                    "horoscope",
+                    "devil fruit",
+                    "role",
+                    "position",
+                    "flaw",
+                    "goal",
+                ].some((k) => keyLower.includes(k));
+
+            if (isKnownKey || isProperCaseKey) {
+                const normalizedKey =
+                    key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+
+                if (appearanceKeys.some((k) => keyLower.includes(k))) {
+                    appearance[normalizedKey] = trimmedValue;
+                } else if (backgroundKeys.some((k) => keyLower.includes(k))) {
+                    background[normalizedKey] = trimmedValue;
+                } else {
+                    other[normalizedKey] = trimmedValue;
+                }
+                continue;
+            }
+        }
+
+        descriptionLines.push(trimmedLine);
+    }
+
+    const cleanAbout = descriptionLines.join("\n").trim();
+
+    return { categories: { appearance, background, other }, cleanAbout };
+}
+
+const { categories, cleanAbout } = parseCharacterAbout(character.about);
+const { appearance, background, other } = categories;
+---
+
+<Layout title={`${character.name} - Character Details`}>
+    <div class="pt-24 pb- animate-fade-in relative min-h-screen">
+        <div
+            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none"
+        >
+            <img
+                src={imageUrl}
+                class="w-full h-full object-cover blur-[100px] scale-125"
+                alt=""
+                aria-hidden="true"
+            />
+            <div class="absolute inset-0 bg-bg/80"></div>
+            <div
+                class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent"
+            >
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-10">
+            <!-- Left Column: Image & Info -->
+            <div class="w-full lg:w-80 shrink-0 space-y-6">
+                <!-- Character Image -->
+                <div
+                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 border border-border animate-fade-up relative group"
+                >
+                    {
+                        imageUrl ? (
+                            <img
+                                src={imageUrl}
+                                alt={character.name}
+                                class="w-full aspect-3/4 object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                        ) : (
+                            <div class="w-full aspect-3/4 bg-text-muted animate-pulse" />
+                        )
+                    }
+                </div>
+
+                <!-- Character Information (Static) -->
+                <div
+                    class="glass rounded-2xl p-6 space-y-5 animate-fade-up"
+                    style="animation-delay: 0.1s"
+                >
+                    <h3 class="section-title text-xl">Character Info</h3>
+                    <ul class="text-sm space-y-4">
+                        {
+                            character.age && (
+                                <li class="flex flex-col gap-1">
+                                    <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                        Age
+                                    </span>
+                                    <span class="text-text-primary font-medium">
+                                        {character.age}
+                                    </span>
+                                </li>
+                            )
+                        }
+                        {
+                            character.birthday && (
+                                <li class="flex flex-col gap-1">
+                                    <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                        Birthday
+                                    </span>
+                                    <span class="text-text-primary font-medium">
+                                        {character.birthday}
+                                    </span>
+                                </li>
+                            )
+                        }
+                        <li class="flex flex-col gap-1">
+                            <span
+                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
+                                >Favorites</span
+                            >
+                            <span class="text-text-primary font-medium">
+                                {formatNumber(character.favorites)}
+                            </span>
+                        </li>
+                        {
+                            character.nicknames &&
+                                character.nicknames.length > 0 && (
+                                    <li class="flex flex-col gap-2">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            Nicknames
+                                        </span>
+                                        <div class="flex flex-wrap gap-1">
+                                            {character.nicknames.map(
+                                                (nickname) => (
+                                                    <span class="px-2 py-0.5 bg-surface-elevated rounded text-xs text-text-secondary">
+                                                        {nickname}
+                                                    </span>
+                                                ),
+                                            )}
+                                        </div>
+                                    </li>
+                                )
+                        }
+                    </ul>
+                </div>
+
+                <!-- Parsed About Info - Appearance -->
+                {
+                    Object.keys(appearance).length > 0 && (
+                        <div
+                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                            style="animation-delay: 0.12s"
+                        >
+                            <h3 class="section-title text-xl">Appearance</h3>
+                            <ul class="text-sm space-y-3">
+                                {Object.entries(appearance).map(
+                                    ([key, value]) => (
+                                        <li class="flex flex-col gap-0.5">
+                                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                                {key}
+                                            </span>
+                                            <span class="text-text-primary font-medium">
+                                                {value}
+                                            </span>
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        </div>
+                    )
+                }
+
+                <!-- Parsed About Info - Background -->
+                {
+                    Object.keys(background).length > 0 && (
+                        <div
+                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                            style="animation-delay: 0.13s"
+                        >
+                            <h3 class="section-title text-xl">Background</h3>
+                            <ul class="text-sm space-y-3">
+                                {Object.entries(background).map(
+                                    ([key, value]) => (
+                                        <li class="flex flex-col gap-0.5">
+                                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                                {key}
+                                            </span>
+                                            <span class="text-text-primary font-medium">
+                                                {value}
+                                            </span>
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        </div>
+                    )
+                }
+
+                <!-- Parsed About Info - Other -->
+                {
+                    Object.keys(other).length > 0 && (
+                        <div
+                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                            style="animation-delay: 0.14s"
+                        >
+                            <h3 class="section-title text-xl">Other</h3>
+                            <ul class="text-sm space-y-3">
+                                {Object.entries(other).map(([key, value]) => (
+                                    <li class="flex flex-col gap-0.5">
+                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            {key}
+                                        </span>
+                                        <span class="text-text-primary font-medium">
+                                            {value}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                }
+            </div>
+
+            <!-- Right Column: Main Details -->
+            <div
+                class="flex-1 space-y-6 animate-fade-up"
+                style="animation-delay: 0.2s"
+            >
+                <!-- Header -->
+                <header class="space-y-4">
+                    <h1
+                        class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-clip-text text-transparent bg-linear-to-r from-white via-text-primary to-text-secondary pb-2"
+                    >
+                        {character.name}
+                    </h1>
+                    {
+                        character.name_kanji && (
+                            <h2 class="text-xl md:text-2xl text-text-muted font-medium tracking-wide">
+                                {character.name_kanji}
+                            </h2>
+                        )
+                    }
+                </header>
+
+                <!-- About Text (Cleaned) -->
+                {
+                    (cleanAbout ||
+                        (character.about &&
+                            Object.keys(appearance).length === 0 &&
+                            Object.keys(background).length === 0 &&
+                            Object.keys(other).length === 0)) && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.3s"
+                        >
+                            <div class="glass p-6 md:p-8 rounded-2xl">
+                                <h3 class="section-title text-2xl mb-4 font-bold">
+                                    About
+                                </h3>
+                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
+                                    {cleanAbout || character.about}
+                                </p>
+                            </div>
+                        </section>
+                    )
+                }
+
+                <!-- Anime Roles -->
+                {
+                    animeRoles.length > 0 && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.4s"
+                        >
+                            <h3 class="section-title text-2xl font-bold">
+                                Anime Appearances
+                            </h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {animeRoles.map((role) => (
+                                    <a
+                                        href={`/anime/${role.anime.mal_id}`}
+                                        class="group bg-surface border border-border rounded-xl overflow-hidden hover:border-border-hover transition-all duration-300"
+                                    >
+                                        <div class="aspect-3/4 relative overflow-hidden">
+                                            <img
+                                                src={
+                                                    role.anime.images?.webp
+                                                        ?.image_url ||
+                                                    role.anime.images?.jpg
+                                                        ?.image_url ||
+                                                    ""
+                                                }
+                                                alt={role.anime.title}
+                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                loading="lazy"
+                                            />
+                                            <div class="absolute inset-0 bg-linear-to-t from-surface via-transparent to-transparent" />
+                                        </div>
+                                        <div class="p-3">
+                                            <h3 class="text-sm font-medium text-text-primary line-clamp-2 mb-1">
+                                                {role.anime.title_english ||
+                                                    role.anime.title}
+                                            </h3>
+                                            <p class="text-xs text-accent uppercase tracking-wider">
+                                                {role.role}
+                                            </p>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </section>
+                    )
+                }
+
+                <!-- Manga Roles -->
+                {
+                    mangaRoles.length > 0 && (
+                        <section
+                            class="space-y-5 animate-fade-up"
+                            style="animation-delay: 0.5s"
+                        >
+                            <h3 class="section-title text-2xl font-bold">
+                                Manga Appearances
+                            </h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {mangaRoles.map((role) => (
+                                    <a
+                                        href={`/manga/${role.manga.mal_id}`}
+                                        class="group bg-surface border border-border rounded-xl overflow-hidden hover:border-border-hover transition-all duration-300"
+                                    >
+                                        <div class="aspect-3/4 relative overflow-hidden">
+                                            <img
+                                                src={
+                                                    role.manga.images?.webp
+                                                        ?.image_url ||
+                                                    role.manga.images?.jpg
+                                                        ?.image_url ||
+                                                    ""
+                                                }
+                                                alt={role.manga.title}
+                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                loading="lazy"
+                                            />
+                                            <div class="absolute inset-0 bg-linear-to-t from-surface via-transparent to-transparent" />
+                                        </div>
+                                        <div class="p-3">
+                                            <h3 class="text-sm font-medium text-text-primary line-clamp-2 mb-1">
+                                                {role.manga.title_english ||
+                                                    role.manga.title}
+                                            </h3>
+                                            <p class="text-xs text-accent-pink uppercase tracking-wider">
+                                                {role.role}
+                                            </p>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </section>
+                    )
+                }
+
+                <!-- Empty State -->
+                {
+                    animeRoles.length === 0 && mangaRoles.length === 0 && (
+                        <div class="flex flex-col items-center justify-center py-12 text-center">
+                            <p class="text-text-muted">
+                                No anime or manga appearances found for this
+                                character.
+                            </p>
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </div>
+</Layout>

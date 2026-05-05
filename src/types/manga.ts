@@ -43,4 +43,3 @@ export interface Published {
     to: string;
     prop: Prop;
 }
-

@@ -1,19 +1,9 @@
+import type { VoiceActor } from "@/types/index";
+
 export interface CharacterImage {
   image_url: string;
   small_image_url: string;
-  large_image_url: string;
-}
-
-export interface VoiceActorPerson {
-  mal_id: number;
-  url: string;
-  images: { jpg: { image_url: string } };
-  name: string;
-}
-
-export interface VoiceActor {
-  person: VoiceActorPerson;
-  language: string;
+  large_image_url?: string;
 }
 
 export interface CharacterAnime {
@@ -98,13 +88,59 @@ export interface CharacterListResponse {
   };
 }
 
-export interface PaginationParse {
-  hasNextPage: boolean;
-  currentPage: number;
-  totalPages: number;
-}
-
 export interface FilterOption {
   slug: string;
   label: string;
+}
+
+export interface CharacterFull {
+  mal_id: number;
+  url: string;
+  images: {
+    jpg: CharacterImage;
+    webp: CharacterImage;
+  };
+  age?: string;
+  birthday?: string;
+  name: string;
+  name_kanji: string;
+  nicknames: string[];
+  favorites: number;
+  about: string;
+  anime: {
+    role: string;
+    anime: {
+      mal_id: number;
+      url: string;
+      images: {
+        jpg: CharacterImage & { large_image_url?: string };
+        webp: CharacterImage & { large_image_url?: string };
+      };
+      title: string;
+    };
+  }[];
+  manga: {
+    role: string;
+    manga: {
+      mal_id: number;
+      url: string;
+      images: {
+        jpg: CharacterImage & { large_image_url?: string };
+        webp: CharacterImage & { large_image_url?: string };
+      };
+      title: string;
+    };
+  }[];
+  voices: VoiceActor[];
+}
+
+export interface CharacterPicture {
+  jpg: {
+    image_url: string;
+    large_image_url?: string;
+  };
+  webp: {
+    image_url: string;
+    large_image_url?: string;
+  };
 }

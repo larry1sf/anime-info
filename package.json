@@ -9,8 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "10.0.6",
     "@astrojs/react": "4.4.2",
+    "@astrojs/vercel": "^10.0.6",
     "@tabler/icons-react": "3.41.1",
     "@tailwindcss/vite": "4.1.18",
     "@types/react": "19.2.13",

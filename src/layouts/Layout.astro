@@ -12,39 +12,52 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <ClientRouter />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-        <meta name="generator" content={Astro.generator} />
-        <meta
-            name="description"
-            content="Discover and explore your favorite anime and manga series with Anime Wiki"
-        />
-        <title>{title} — Anime Wiki</title>
-    </head>
+<head>
+    <meta charset="UTF-8" />
+    <ClientRouter />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+        name="description"
+        content="Discover and explore your favorite anime and manga series with Anime Wiki"
+    />
+    <title>{title} — Anime Wiki</title>
+    <script is:inline>
+        const theme = localStorage.getItem("theme-anime-info");
+        if (theme === "light") document.documentElement.classList.add("light");
+    </script>
+</head>
 
-    <body class="bg-bg text-text-primary min-h-screen antialiased">
-        <div class="relative">
-            <!-- Subtle gradient background -->
-            <div class="fixed inset-0 pointer-events-none z-0">
-                <div class="absolute top-0 left-1/4 w-96 h-96 bg-accent/3 rounded-full blur-[128px]"></div>
-                <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent-pink/3 rounded-full blur-[128px]"></div>
+<body class="bg-bg text-text-primary min-h-screen antialiased">
+    <div class="relative">
+        <div
+            class="fixed inset-0 pointer-events-none z-0 html:light:opacity-0"
+            aria-hidden="true"
+        >
+            <div
+                class="absolute top-0 left-1/4 w-96 h-96 bg-accent/3 rounded-full blur-[128px]"
+            >
             </div>
-
-            <Menu />
-            <div class="relative z-10 max-w-6xl mx-auto px-4">
-                <main class="min-h-screen">
-                    <slot />
-                </main>
-                <Footer />
+            <div
+                class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent-pink/3 rounded-full blur-[128px]"
+            >
             </div>
         </div>
-    </body>
-</html>
+
+        <Menu />
+        <div class="relative z-10 max-w-6xl mx-auto px-4">
+            <main class="min-h-screen">
+                <slot />
+            </main>
+            <Footer />
+        </div>
+    </div>
+</body>

@@ -27,7 +27,13 @@ interface SectionProps {
   onSelect: (result: SearchResult & { _type: string }) => void;
 }
 
-function SearchSection({ title, results, visibleCount, onShowMore, onSelect }: SectionProps) {
+function SearchSection({
+  title,
+  results,
+  visibleCount,
+  onShowMore,
+  onSelect,
+}: SectionProps) {
   const visibleResults = results.slice(0, visibleCount);
   const hasMore = visibleCount < results.length;
   const isCharacter = title.toLowerCase() === "characters";
@@ -35,8 +41,13 @@ function SearchSection({ title, results, visibleCount, onShowMore, onSelect }: S
   return (
     <div>
       <div className="sticky top-0 z-10 bg-surface-elevated border-b border-border/40 px-4 py-2 flex items-center justify-between">
-        <span className={`text-xs font-semibold uppercase tracking-wider ${isCharacter ? "text-accent-rose" : "text-text-secondary"}`}>
-          {title} <span className="text-text-muted font-normal">({visibleResults.length}/{results.length})</span>
+        <span
+          className={`text-xs font-semibold uppercase tracking-wider ${isCharacter ? "text-accent-rose" : "text-text-secondary"}`}
+        >
+          {title}{" "}
+          <span className="text-text-muted font-normal">
+            ({visibleResults.length}/{results.length})
+          </span>
         </span>
         {hasMore && (
           <button
@@ -67,11 +78,13 @@ function SearchSection({ title, results, visibleCount, onShowMore, onSelect }: S
                 {result.title}
               </p>
               <p className="text-xs text-text-muted flex items-center gap-1.5">
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                  result._type === "anime" 
-                    ? "bg-accent/15 text-accent" 
-                    : "bg-accent-pink/15 text-accent-pink"
-                }`}>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                    result._type === "anime"
+                      ? "bg-accent/15 text-accent"
+                      : "bg-accent-pink/15 text-accent-pink"
+                  }`}
+                >
                   {result.type}
                 </span>
                 {result.year && <span>• {result.year}</span>}
@@ -92,7 +105,13 @@ interface CharacterSectionProps {
   onSelect: (result: CharacterResult) => void;
 }
 
-function CharacterSection({ title, results, visibleCount, onShowMore, onSelect }: CharacterSectionProps) {
+function CharacterSection({
+  title,
+  results,
+  visibleCount,
+  onShowMore,
+  onSelect,
+}: CharacterSectionProps) {
   const visibleResults = results.slice(0, visibleCount);
   const hasMore = visibleCount < results.length;
 
@@ -105,7 +124,10 @@ function CharacterSection({ title, results, visibleCount, onShowMore, onSelect }
     <div>
       <div className="sticky top-0 z-10 bg-surface-elevated border-b border-border/40 px-4 py-2 flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-accent-rose">
-          {title} <span className="text-text-muted font-normal">({visibleResults.length}/{results.length})</span>
+          {title}{" "}
+          <span className="text-text-muted font-normal">
+            ({visibleResults.length}/{results.length})
+          </span>
         </span>
         {hasMore && (
           <button
@@ -154,12 +176,15 @@ function CharacterSection({ title, results, visibleCount, onShowMore, onSelect }
 export default function SearchInput() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [characterResults, setCharacterResults] = useState<CharacterResult[]>([]);
+  const [characterResults, setCharacterResults] = useState<CharacterResult[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [animeVisibleCount, setAnimeVisibleCount] = useState(ITEMS_PER_SECTION);
   const [mangaVisibleCount, setMangaVisibleCount] = useState(ITEMS_PER_SECTION);
-  const [characterVisibleCount, setCharacterVisibleCount] = useState(ITEMS_PER_SECTION);
+  const [characterVisibleCount, setCharacterVisibleCount] =
+    useState(ITEMS_PER_SECTION);
   const ref = useRef<HTMLDivElement>(null);
 
   const animeResults = results.filter((r) => r._type === "anime");
@@ -174,7 +199,9 @@ export default function SearchInput() {
     { type: "anime", count: animeResults.length },
     { type: "manga", count: mangaResults.length },
     { type: "characters", count: characterResults.length },
-  ].filter((s) => s.count > 0).sort((a, b) => b.count - a.count);
+  ]
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   const primarySection = sections[0]?.type || "anime";
   const secondarySection = sections[1]?.type;
@@ -241,15 +268,21 @@ export default function SearchInput() {
   };
 
   const handleShowMoreAnime = () => {
-    setAnimeVisibleCount((prev) => Math.min(prev + ITEMS_PER_SECTION, animeResults.length));
+    setAnimeVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_SECTION, animeResults.length),
+    );
   };
 
   const handleShowMoreManga = () => {
-    setMangaVisibleCount((prev) => Math.min(prev + ITEMS_PER_SECTION, mangaResults.length));
+    setMangaVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_SECTION, mangaResults.length),
+    );
   };
 
   const handleShowMoreCharacters = () => {
-    setCharacterVisibleCount((prev) => Math.min(prev + ITEMS_PER_SECTION, characterResults.length));
+    setCharacterVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_SECTION, characterResults.length),
+    );
   };
 
   const renderSection = (sectionType: string) => {
@@ -322,7 +355,7 @@ export default function SearchInput() {
       </form>
 
       {isOpen && query.length >= 2 && (
-        <div className="absolute top-full mt-2 right-0 w-[28rem] bg-surface-elevated rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in border border-border/50">
+        <div className="absolute top-full mt-2 right-0 w-md bg-surface-elevated rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in border border-border/50">
           {!loading && !hasResults && (
             <div className="p-6 text-center text-text-muted text-sm">
               No results found
@@ -336,7 +369,7 @@ export default function SearchInput() {
           )}
 
           {!loading && hasResults && (
-            <div className="max-h-[32rem] overflow-y-auto divide-y divide-border/30">
+            <div className="max-h-128 overflow-y-auto divide-y divide-border/30">
               {primarySection && renderSection(primarySection)}
               {secondarySection && renderSection(secondarySection)}
               {tertiarySection && renderSection(tertiarySection)}

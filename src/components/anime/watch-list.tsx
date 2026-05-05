@@ -1,17 +1,27 @@
 import { useState, useEffect } from "react";
 import { IconBookmarkFilled, IconBookmarkPlus } from "@tabler/icons-react";
-import { LIMIT_ANIME } from "@/const";
+import { LIMIT_ANIME, KEY_LOCAL_STORAGE } from "@/const";
+import type { Anime } from "@/types/anime";
 
-interface WatchListStorage {
-  anime: number[];
-  manga: number[];
+interface WatchListItem {
+  mal_id: number;
+  title: string;
+  title_english?: string;
+  title_japanese?: string;
+  images: Anime["images"];
+  type: string;
+  rating?: string;
+  status?: string;
 }
 
-const STORAGE_KEY = "favorite-anime-info";
+interface WatchListStorage {
+  anime: WatchListItem[];
+  manga: WatchListItem[];
+}
 
 const loadFromStorage = (): WatchListStorage => {
   if (typeof window === "undefined") return { anime: [], manga: [] };
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(KEY_LOCAL_STORAGE);
   if (!stored) return { anime: [], manga: [] };
   try {
     return JSON.parse(stored) as WatchListStorage;
@@ -21,7 +31,7 @@ const loadFromStorage = (): WatchListStorage => {
 };
 
 const saveToStorage = (data: WatchListStorage) => {
-  if (data) localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  if (data) localStorage.setItem(KEY_LOCAL_STORAGE, JSON.stringify(data));
 };
 
 const colorActive =
@@ -32,34 +42,44 @@ const colorDisabled =
   "cursor-not-allowed opacity-50 flex items-center gap-2 bg-transparent glass text-text-muted px-5 py-2.5 rounded-xl text-sm font-semibold border border-border/50 transition-all duration-300";
 
 export default function WatchList({
-  id,
+  anime,
   section,
 }: {
-  id: number;
+  anime: Anime;
   section: "anime" | "manga";
 }) {
   const [isFollow, setIsFollow] = useState(false);
   const [isLimit, setIsLimit] = useState(false);
-  const [_, setStorage] = useState<WatchListStorage>({
+  const [, setStorage] = useState<WatchListStorage>({
     anime: [],
     manga: [],
   });
 
+  const item: WatchListItem = {
+    mal_id: anime.mal_id,
+    title: anime.title,
+    title_english: anime.title_english,
+    title_japanese: anime.title_japanese,
+    images: anime.images,
+    type: anime.type,
+    rating: anime.rating,
+    status: anime.status,
+  };
+
   useEffect(() => {
     const data = loadFromStorage();
-    console.log(data);
     setStorage(data);
-    const exists = data[section].some((item) => item === id);
+    const exists = data[section].some((item) => item.mal_id === anime.mal_id);
     setIsFollow(exists);
     setIsLimit(Object.values(data).flat().length >= LIMIT_ANIME && !exists);
-  }, [id, section]);
+  }, [anime.mal_id, section]);
 
   const handleClick = () => {
     if (isLimit) return;
 
     const currentStorage = loadFromStorage();
     const existsIndex = currentStorage[section].findIndex(
-      (item) => item === id,
+      (item) => item.mal_id === anime.mal_id,
     );
 
     let newStorage: WatchListStorage;
@@ -80,7 +100,7 @@ export default function WatchList({
       }
       newStorage = {
         ...currentStorage,
-        [section]: [...currentStorage[section], id],
+        [section]: [...currentStorage[section], item],
       };
       setIsFollow(true);
     }

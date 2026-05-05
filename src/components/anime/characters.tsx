@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function CharactersList({ characters }: { characters: any[] }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +62,8 @@ export default function CharactersList({ characters }: { characters: any[] }) {
   const pageNumbers = getPageNumbers();
 
   return (
-    <section className="space-y-5 animate-fade-up min-h-200 md:min-h-180">
+    <ErrorBoundary>
+      <section className="space-y-5 animate-fade-up min-h-200 md:min-h-160 glass p-6 rounded-2xl">
       <div className="flex items-center justify-between">
         <h3 className="section-title text-2xl font-bold">Characters</h3>
         <span className="text-xs text-text-muted">
@@ -73,9 +75,10 @@ export default function CharactersList({ characters }: { characters: any[] }) {
 
       <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {visibleCharacters.map((char: any, index: number) => (
-          <article
+          <a
             key={char.character.mal_id + "-" + index}
-            className="glass rounded-2xl p-2 flex flex-col gap-3 group hover:-translate-y-1  border border-border/50 hover:border-accent/40 shadow-xl shadow-transparent hover:shadow-accent/10 transition-all duration-600"
+            href={`/character/${char.character.mal_id}`}
+            className="glass rounded-2xl p-2 flex flex-col gap-3 group hover:-translate-y-1  border border-border/50 hover:border-accent/40 shadow-xl shadow-transparent hover:shadow-accent/10 transition-all duration-600 cursor-pointer"
           >
             <div className="relative w-full aspect-3/4 overflow-hidden rounded-xl">
               <img
@@ -100,7 +103,7 @@ export default function CharactersList({ characters }: { characters: any[] }) {
                 {char.role}
               </span>
             </footer>
-          </article>
+          </a>
         ))}
       </section>
 
@@ -178,5 +181,6 @@ export default function CharactersList({ characters }: { characters: any[] }) {
         </section>
       )}
     </section>
+    </ErrorBoundary>
   );
 }

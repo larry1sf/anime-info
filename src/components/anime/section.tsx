@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import Select from "@/components/anime/select";
+import { useCallback, useEffect, useState } from "react";
 import Card from "@/components/anime/card";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import FilterBar, { type FilterConfig, type FilterOption } from "@/components/filter-bar";
 import {
-  ratingsOptions,
   typesOptions,
   statusOptions,
+  yearOptions,
+  orderByOptions,
+  sortOptions,
   LIMIT_ANIME,
+  KEY_LOCAL_STORAGE,
 } from "@/const";
-import { IconBook, IconDeviceTv, IconSearch, IconX } from "@tabler/icons-react";
+import { IconBook, IconDeviceTv, IconBookmarkOff, IconSearch } from "@tabler/icons-react";
 import type { Anime, PaginationParse } from "@/types/anime";
 
 const optionsViews = [
@@ -15,12 +19,45 @@ const optionsViews = [
   { slug: "manga", name: "Manga", icon: <IconBook size={14} /> },
 ];
 const filtersInitial = {
-  rating: { slug: "", label: "All" },
+  orderBy: { slug: "mal_id", label: "Default" },
+  sort: { slug: "desc", label: "Desc" },
   type: { slug: "", label: "All" },
   status: { slug: "", label: "All" },
+  year: { slug: "", label: "All Years" },
 };
 
-export default function Section() {
+interface WatchListItem {
+  mal_id: number;
+  title: string;
+  title_english?: string;
+  title_japanese?: string;
+  images: Anime["images"];
+  type: string;
+  rating?: string;
+  status?: string;
+}
+
+interface WatchListStorage {
+  anime: WatchListItem[];
+  manga: WatchListItem[];
+}
+
+const loadFromStorage = (): WatchListStorage => {
+  if (typeof window === "undefined") return { anime: [], manga: [] };
+  const stored = localStorage.getItem(KEY_LOCAL_STORAGE);
+  if (!stored) return { anime: [], manga: [] };
+  try {
+    return JSON.parse(stored) as WatchListStorage;
+  } catch {
+    return { anime: [], manga: [] };
+  }
+};
+
+interface SectionProps {
+  watchListMode?: boolean;
+}
+
+export default function Section({ watchListMode = false }: SectionProps) {
   const [tab, setTab] = useState(optionsViews[0].slug);
 
   const [dataAnimes, setDataAnimes] = useState<Anime[]>([]);
@@ -29,35 +66,79 @@ export default function Section() {
   );
   const [filters, setFilters] = useState(filtersInitial);
 
-  // Search mode state
-  const [isSearchMode, setIsSearchMode] = useState(false);
+  // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Debounce search query (400ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   const fetchData = useCallback(
     async ({ page }: { page: number }) => {
+      setIsLoading(true);
+
       try {
-        setIsLoading(true);
+        if (watchListMode) {
+          const storage = loadFromStorage();
+          const items = storage[tab as keyof typeof storage];
+
+          const favorites: Anime[] = items.map((item) => ({
+            mal_id: item.mal_id,
+            title: item.title,
+            title_english: item.title_english,
+            title_japanese: item.title_japanese,
+            images: item.images,
+            type: item.type,
+            rating: item.rating,
+            status: item.status,
+            url: "",
+            trailer: { youtube_id: "", url: "", embed_url: "" },
+            approved: false,
+            titles: [],
+            title_synonyms: [],
+            source: "",
+            episodes: 0,
+            airing: false,
+            aired: { from: "", to: "", prop: { from: {}, to: {} }, string: "" },
+            duration: "",
+            score: 0,
+            scored_by: 0,
+            rank: 0,
+            popularity: 0,
+            members: 0,
+            favorites: 0,
+            synopsis: "",
+            background: "",
+            season: "",
+            year: 0,
+            broadcast: { day: "", time: "", timezone: "", string: "" },
+            producers: [],
+            licensors: [],
+            studios: [],
+            genres: [],
+            explicit_genres: [],
+            themes: [],
+            demographics: [],
+            relations: [],
+            theme: { openings: [], endings: [] },
+            external: [],
+            streaming: [],
+          }));
+
+          setDataAnimes(favorites);
+          setIsLoading(false);
+          return;
+        }
+
         const body: Record<string, unknown> = {
           page,
           section: tab,
         };
 
-        if (isSearchMode && debouncedQuery.trim()) {
-          body.query = debouncedQuery.trim();
+        if (searchQuery.trim()) {
+          body.query = searchQuery.trim();
         } else {
           body.status = filters.status.slug;
-          body.rating = filters.rating.slug;
           body.type = filters.type.slug;
+          body.year = filters.year.slug;
+          body.order_by = filters.orderBy.slug;
+          body.sort = filters.sort.slug;
         }
 
         const res = await fetch("/api/route", {
@@ -68,8 +149,7 @@ export default function Section() {
           body: JSON.stringify(body),
         });
         if (!res.ok) {
-          console.log("error en la peticion al server local");
-          return;
+          throw new Error(`Error: ${res.status}`);
         }
         const { data, pagination } = await res.json();
 
@@ -85,10 +165,13 @@ export default function Section() {
     },
     [
       filters.status.slug,
-      filters.rating.slug,
       filters.type.slug,
+      filters.year.slug,
+      filters.orderBy.slug,
+      filters.sort.slug,
       tab,
-      debouncedQuery,
+      searchQuery,
+      watchListMode,
     ],
   );
 
@@ -101,145 +184,92 @@ export default function Section() {
   }, [fetchData]);
 
   const handleNextPage = () => {
-    if (dataPagination?.hasNextPage)
-      fetchData({ page: dataPagination.currentPage + 1 });
+    if (watchListMode) {
+      if (dataPagination && dataPagination.hasNextPage) {
+        setDataPagination((prev) =>
+          prev ? { ...prev, currentPage: prev.currentPage + 1 } : null,
+        );
+      }
+    } else {
+      if (dataPagination?.hasNextPage)
+        fetchData({ page: dataPagination.currentPage + 1 });
+    }
   };
 
   const handlePrevPage = () => {
-    if (dataPagination && dataPagination.currentPage > 1)
-      fetchData({ page: dataPagination.currentPage - 1 });
+    if (watchListMode) {
+      if (dataPagination && dataPagination.currentPage > 1) {
+        setDataPagination((prev) =>
+          prev ? { ...prev, currentPage: prev.currentPage - 1 } : null,
+        );
+      }
+    } else {
+      if (dataPagination && dataPagination.currentPage > 1)
+        fetchData({ page: dataPagination.currentPage - 1 });
+    }
   };
 
   const handleChangeTab = (slug: string) => {
     setTab(slug);
     setFilters(filtersInitial);
     setSearchQuery("");
-    setDebouncedQuery("");
-    setIsSearchMode(false);
   };
 
-  const toggleSearchMode = () => {
-    setIsSearchMode((prev) => {
-      const next = !prev;
-      if (next) {
-        // Entering search mode: reset filters
-        setFilters(filtersInitial);
-        setTimeout(() => searchInputRef.current?.focus(), 350);
-      } else {
-        // Leaving search mode: clear query
-        setSearchQuery("");
-        setDebouncedQuery("");
-      }
-      return next;
-    });
+  const handleFilterChange = (key: string, option: FilterOption) => {
+    setFilters((prev) => ({ ...prev, [key]: option }));
+  };
+
+  const renderFilters = (): FilterConfig[] => {
+    const tabKey = tab as keyof typeof typesOptions;
+    return [
+      { key: "orderBy", label: "Sort By", options: orderByOptions },
+      { key: "sort", label: "Order", options: sortOptions },
+      { key: "type", label: "Type", options: typesOptions[tabKey] || [] },
+      { key: "status", label: "Status", options: statusOptions[tabKey] || [] },
+      { key: "year", label: "Year", options: yearOptions[tabKey] || [] },
+    ];
   };
 
   return (
-    <section className="space-y-8 pt-14 min-h-dvh">
+    <ErrorBoundary>
+      <section className="space-y-8 pt-14 min-h-dvh">
       {/* Header with title + controls */}
-      <article className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
+      <article className="flex flex-col gap-6">
         {/* Tab switcher */}
-        <div className="flex flex-col gap-3">
-          <h2 className="section-title">Browse</h2>
-          <div className="flex items-center gap-1 bg-surface rounded-xl border border-border p-1">
-            {optionsViews.map((option) => (
-              <button
-                key={option.slug}
-                type="button"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
-                  option.slug === tab
-                    ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
-                    : "text-text-muted hover:text-text-primary hover:bg-white/4"
-                }`}
-                onClick={() => handleChangeTab(option.slug)}
-              >
-                {option.icon}
-                {option.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filters / Search area */}
-        <div className="flex items-end gap-3 z-100">
-          {/* Search toggle button */}
-          <button
-            type="button"
-            onClick={toggleSearchMode}
-            className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl border cursor-pointer transition-all duration-300 ${
-              isSearchMode
-                ? "bg-accent border-accent/30 text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
-                : "bg-surface border-border text-text-muted hover:text-text-primary hover:border-border-hover"
-            }`}
-            title={isSearchMode ? "Volver a filtros" : "Buscar por nombre"}
-          >
-            {isSearchMode ? <IconX size={16} /> : <IconSearch size={16} />}
-          </button>
-
-          {/* Crossfade container — both children are absolute so they swap in place */}
-          <div className="relative min-w-[16rem] sm:min-w-md h-15">
-            {/* --- Selects (filters mode) --- */}
-            <nav
-              className={`absolute inset-0 flex items-end gap-3 transition-all duration-300 ease-in-out ${
-                isSearchMode
-                  ? "opacity-0 scale-95 pointer-events-none"
-                  : "opacity-100 scale-100"
-              }`}
-            >
-              <Select
-                selected={filters.rating}
-                handleSelect={(selected) =>
-                  setFilters((prev) => ({ ...prev, rating: selected }))
-                }
-                options={ratingsOptions[tab as keyof typeof ratingsOptions]}
-                label="Rating"
-              />
-              <Select
-                selected={filters.type}
-                handleSelect={(selected) =>
-                  setFilters((prev) => ({ ...prev, type: selected }))
-                }
-                options={typesOptions[tab as keyof typeof typesOptions]}
-                label="Type"
-              />
-              <Select
-                selected={filters.status}
-                handleSelect={(selected) =>
-                  setFilters((prev) => ({ ...prev, status: selected }))
-                }
-                options={statusOptions[tab as keyof typeof statusOptions]}
-                label="Status"
-              />
-            </nav>
-
-            {/* --- Search input (search mode) --- */}
-            <div
-              className={`absolute inset-0 flex flex-col justify-end gap-1.5 transition-all duration-300 ease-in-out ${
-                isSearchMode
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-95 pointer-events-none"
-              }`}
-            >
-              <label className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
-                Search
-              </label>
-              <div className="relative">
-                <IconSearch
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
-                />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={`Buscar ${tab}...`}
-                  className="w-full pl-8 pr-3 py-2.5 rounded-xl border bg-surface border-border text-text-primary text-xs font-medium placeholder:text-text-muted/50 transition-all duration-300 focus:outline-none focus:bg-surface-elevated focus:border-accent/30 focus:shadow-[0_0_16px_-6px_rgba(167,139,250,0.2)]"
-                />
-              </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div className="flex flex-col gap-3">
+            <h2 className="section-title">{watchListMode ? "My Watchlist" : "Browse"}</h2>
+            <div className="flex items-center gap-1 bg-surface rounded-xl border border-border p-1">
+              {optionsViews.map((option) => (
+                <button
+                  key={option.slug}
+                  type="button"
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
+                    option.slug === tab
+                      ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
+                      : "text-text-muted hover:text-text-primary hover:bg-white/4"
+                  }`}
+                  onClick={() => handleChangeTab(option.slug)}
+                >
+                  {option.icon}
+                  {option.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Filter Bar */}
+        <FilterBar
+          filters={renderFilters()}
+          values={filters}
+          onChange={handleFilterChange}
+          showSearch={true}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder={`Search ${tab}...`}
+          searchIcon={<IconSearch size={16} />}
+        />
       </article>
 
       {/* Cards grid */}
@@ -257,35 +287,44 @@ export default function Section() {
                   index={i}
                 >
                   <div className="flex items-center gap-1.5">
-                    {/*<IconLoader2 size={14} className="animate-spin" />*/}
-                    <span className="text-xs h-4 bg-text-muted animate-pulse rounded w-2/4 uppercase tracking-wider font-medium">
-                      {/*{anime.type}*/}
-                    </span>
+                    <span className="text-xs h-4 bg-text-muted animate-pulse rounded w-2/4 uppercase tracking-wider font-medium"></span>
                   </div>
                 </Card>
               ))
-          : dataAnimes?.map((anime, i) => (
-              <Card
-                id={anime.mal_id}
-                key={anime.mal_id}
-                title={anime.title}
-                rating={anime.rating}
-                image={anime.images.webp.image_url}
-                section={tab}
-                index={i}
-              >
-                <div className="flex items-center gap-1.5">
-                  {anime.type === "anime" ? (
-                    <IconDeviceTv size={12} className="text-accent" />
-                  ) : (
-                    <IconBook size={12} className="text-accent-pink" />
-                  )}
-                  <span className="text-xs text-text-muted uppercase tracking-wider font-medium">
-                    {anime.type}
-                  </span>
+          : watchListMode && dataAnimes.length === 0
+            ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                  <IconBookmarkOff size={64} className="text-text-muted mb-4" />
+                  <h3 className="text-xl font-semibold text-text-primary mb-2">
+                    No favorites yet
+                  </h3>
+                  <p className="text-text-muted text-sm">
+                    Start adding anime or manga to your watchlist!
+                  </p>
                 </div>
-              </Card>
-            ))}
+              )
+            : dataAnimes.map((anime: Anime, i: number) => (
+                <Card
+                  id={anime.mal_id}
+                  key={anime.mal_id}
+                  title={anime.title}
+                  rating={anime.rating}
+                  image={anime.images.webp.image_url}
+                  section={tab}
+                  index={i}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {anime.type === "anime" ? (
+                      <IconDeviceTv size={12} className="text-accent" />
+                    ) : (
+                      <IconBook size={12} className="text-accent-pink" />
+                    )}
+                    <span className="text-xs text-text-muted uppercase tracking-wider font-medium">
+                      {anime.type}
+                    </span>
+                  </div>
+                </Card>
+              ))}
       </section>
 
       <div className="mt-4">
@@ -314,5 +353,6 @@ export default function Section() {
         )}
       </div>
     </section>
+    </ErrorBoundary>
   );
 }

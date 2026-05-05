@@ -1,25 +1,6 @@
 import { API_URL, LIMIT_ANIME } from "@/const";
 import type { Image, SectionsAnime } from "@/types";
-
-const resDefault = {
-  data: null,
-  error: {
-    message: "No hubo ningun error",
-    status: 200,
-  },
-};
-
-const fetchAPI = (url: string) => {
-  return fetch(url, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    },
-  });
-};
+import { resDefault, fetchAPI } from "@/service/index";
 
 interface ErrorApi {
   status: number;
@@ -28,136 +9,10 @@ interface ErrorApi {
   error: string;
 }
 
-export async function getAnimeCharacters(
-  id: number,
-  section: string = "anime",
-) {
-  const url = `${API_URL}/${section}/${id}/characters`;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      return {
-        ...resDefault,
-        error: {
-          message: `Error al recibir los datos de la api en la url: ${url}`,
-          status: res.status,
-        },
-      };
-    }
-    const json = (await res.json()) as {
-      data: import("@/types/anime").AnimeCharacterEntry[];
-    };
-    if (json && json.data) {
-      return {
-        data: json.data,
-        error: { message: "No hubo ningun error", status: 200 },
-      };
-    }
-    return {
-      ...resDefault,
-      error: {
-        message: `No se recibieron datos de la api en la url: ${url}`,
-        status: 404,
-      },
-    };
-  } catch {
-    return {
-      ...resDefault,
-      error: {
-        message: `Error al querer solicitar datos a la url: ${url}`,
-        status: 500,
-      },
-    };
-  }
-}
-
-export async function getCharacterFullById(id: number) {
-  const url = `${API_URL}/characters/${id}/full`;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      return {
-        ...resDefault,
-        error: {
-          message: `Error al recibir los datos de la api en la url: ${url}`,
-          status: res.status,
-        },
-      };
-    }
-    const json = (await res.json()) as {
-      data: import("@/types/anime").CharacterFull;
-    };
-    if (json && json.data) {
-      return {
-        data: json.data,
-        error: { message: "No hubo ningun error", status: 200 },
-      };
-    }
-    return {
-      ...resDefault,
-      error: {
-        message: `No se recibieron datos de la api en la url: ${url}`,
-        status: 404,
-      },
-    };
-  } catch {
-    return {
-      ...resDefault,
-      error: {
-        message: `Error al querer solicitar datos a la url: ${url}`,
-        status: 500,
-      },
-    };
-  }
-}
-
-export async function getCharacterPicturesById(id: number) {
-  const url = `${API_URL}/characters/${id}/pictures`;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      return {
-        ...resDefault,
-        error: {
-          message: `Error al recibir los datos de la api en la url: ${url}`,
-          status: res.status,
-        },
-      };
-    }
-    const json = (await res.json()) as {
-      data: import("@/types/anime").CharacterPicture[];
-    };
-    if (json && json.data) {
-      return {
-        data: json.data,
-        error: { message: "No hubo ningun error", status: 200 },
-      };
-    }
-    return {
-      ...resDefault,
-      error: {
-        message: `No se recibieron datos de la api en la url: ${url}`,
-        status: 404,
-      },
-    };
-  } catch {
-    return {
-      ...resDefault,
-      error: {
-        message: `Error al querer solicitar datos a la url: ${url}`,
-        status: 500,
-      },
-    };
-  }
-}
-
 export async function getGenres(section: string) {
   const url = `${API_URL}/genres/${section}`;
   try {
-    const res = await fetch(url);
+    const res = await fetchAPI(url);
     if (!res.ok) {
       return {
         ...resDefault,
@@ -197,7 +52,7 @@ export async function getGenres(section: string) {
 export async function getProducerById(id: number) {
   const url = `${API_URL}/producers/${id}/full`;
   try {
-    const res = await fetch(url);
+    const res = await fetchAPI(url);
     if (!res.ok) {
       return {
         ...resDefault,
@@ -237,7 +92,7 @@ export async function getProducerById(id: number) {
 export async function getAnimesByProducer(id: number, page: number = 1) {
   const url = `${API_URL}/anime?page=${page}&producers=${id}`;
   try {
-    const res = await fetch(url);
+    const res = await fetchAPI(url);
     if (!res.ok) {
       return {
         ...resDefault,
@@ -282,7 +137,6 @@ export async function getAnimesByProducer(id: number, page: number = 1) {
   }
 }
 
-// nueva generacion
 export async function getTopAnime() {
   const url = `${API_URL}/top/anime?limit=10`;
   try {
@@ -404,6 +258,10 @@ export async function getAnime({
   rating,
   type,
   status,
+  year,
+  source,
+  order_by,
+  sort,
   sectionSearch = "anime",
 }: {
   limit?: number;
@@ -412,6 +270,10 @@ export async function getAnime({
   rating?: string;
   type?: string;
   status?: string;
+  year?: string;
+  source?: string;
+  order_by?: string;
+  sort?: string;
   sectionSearch?: SectionsAnime;
 } = {}) {
   let url = `${API_URL}/${sectionSearch}?limit=${limit}&page=${page}`;
@@ -419,6 +281,13 @@ export async function getAnime({
   if (rating) url += `&rating=${rating}`;
   if (type) url += `&type=${type}`;
   if (status) url += `&status=${status}`;
+  if (year && year !== "2010s" && year !== "2000s" && year !== "1990s") url += `&start_date=${year}-01-01&end_date=${year}-12-31`;
+  if (year === "2010s") url += `&start_date=2010-01-01&end_date=2019-12-31`;
+  if (year === "2000s") url += `&start_date=2000-01-01&end_date=2009-12-31`;
+  if (year === "1990s") url += `&start_date=1990-01-01&end_date=1999-12-31`;
+  if (source) url += `&source=${source}`;
+  if (order_by && order_by !== "mal_id") url += `&order_by=${order_by}`;
+  if (sort && sort !== "desc") url += `&sort=${sort}`;
 
   try {
     const res = await fetchAPI(url);

@@ -74,7 +74,7 @@ export default function Details({
   }[];
 }) {
   return (
-    <section className="glass rounded-2xl p-6 space-y-4 animate-fade-up group select-none">
+    <section className="space-y-4 animate-fade-up group select-none">
       <h3 className="section-title text-xl">Related</h3>
       {optionsDetails?.map((detail) => (
         <DetailItem

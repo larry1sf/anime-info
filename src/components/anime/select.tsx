@@ -58,7 +58,7 @@ export default function Select({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-1.5 w-full z-50 animate-fade-in">
+        <div className="absolute top-full mt-1.5 w-full z-[100] animate-fade-in">
           <ul className="w-full bg-surface-elevated border border-border rounded-xl shadow-2xl overflow-auto max-h-44">
             {options.map(({ slug, label }) => (
               <li

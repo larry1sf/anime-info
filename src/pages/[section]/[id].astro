@@ -32,59 +32,43 @@ const relateds = item.relations || [];
 ---
 
 <Layout title={item.title || "Detail"}>
-    <div class="pt-24 pb- animate-fade-in relative min-h-screen">
-        {/* Backdrop for blur */}
-        <div
-            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none"
+    <div class="pt-14 pb- animate-fade-in relative min-h-screen">
+        <section
+            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-10 pointer-events-none"
         >
             <img
                 src={imageUrl}
-                class="w-full h-full object-cover blur-[100px] scale-125"
+                class="w-full h-full object-cover blur-[80px] scale-110"
                 alt=""
                 aria-hidden="true"
             />
-            <div class="absolute inset-0 bg-bg/80"></div>
-            <div
-                class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent"
-            >
-            </div>
-        </div>
+            <div class="absolute inset-0 bg-bg/60"></div>
+        </section>
 
-        <div class="flex flex-col lg:flex-row gap-10">
-            {/* Left Column: Image & Info */}
-            <div class="w-full lg:w-80 shrink-0 space-y-6">
-                <!-- Cover Image -->
+        <section class="flex flex-col lg:flex-row gap-12">
+            <article class="w-full lg:w-72 shrink-0 space-y-6">
                 <div
-                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 border border-border animate-fade-up relative group"
+                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/10 animate-fade-up relative group"
                 >
                     <img
                         src={imageUrl}
                         alt={item.title}
                         class="w-full aspect-3/4 object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div
-                        class="absolute inset-0 bg-linear-to-t from-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    >
-                    </div>
                 </div>
-                <!-- button watchlist -->
                 <WatchlistButton
                     anime={item}
                     section={section as "anime" | "manga"}
                     client:visible
                 />
-                <!-- Sidebar Information -->
                 <div
-                    class="glass rounded-2xl p-6 space-y-5 animate-fade-up"
-                    style="animation-delay: 0.1s"
+                    class="space-y-3 animate-fade-up"
+                    style="animation-delay: 0.15s"
                 >
                     <h3 class="section-title text-xl">Information</h3>
-                    <ul class="text-sm space-y-4">
-                        <li class="flex flex-col gap-1">
-                            <span
-                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
-                                >Type</span
-                            >
+                    <ul class="text-sm space-y-3">
+                        <li class="flex justify-between">
+                            <span class="text-text-muted">Type</span>
                             <span class="text-text-primary font-medium"
                                 >{item.type || "Unknown"}</span
                             >
@@ -92,29 +76,37 @@ const relateds = item.relations || [];
                         {
                             isAnime ? (
                                 <>
-                                    <li class="flex flex-col gap-1">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
                                             Episodes
                                         </span>
                                         <span class="text-text-primary font-medium">
                                             {item.episodes || "Unknown"}
                                         </span>
                                     </li>
-                                    <li class="flex flex-col gap-1">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                            Aired
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
+                                            Status
                                         </span>
                                         <span class="text-text-primary font-medium">
+                                            {item.status || "Unknown"}
+                                        </span>
+                                    </li>
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
+                                            Aired
+                                        </span>
+                                        <span class="text-text-primary font-medium text-right">
                                             {item.aired?.string || "Unknown"}
                                         </span>
                                     </li>
                                     {item.studios &&
                                         item.studios.length > 0 && (
-                                            <li class="flex flex-col gap-1">
-                                                <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            <li class="flex justify-between">
+                                                <span class="text-text-muted">
                                                     Studios
                                                 </span>
-                                                <span class="text-text-primary font-medium">
+                                                <span class="text-text-primary font-medium text-right">
                                                     {item.studios
                                                         .map((s: any) => s.name)
                                                         .join(", ")}
@@ -124,38 +116,46 @@ const relateds = item.relations || [];
                                 </>
                             ) : (
                                 <>
-                                    <li class="flex flex-col gap-1">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
                                             Chapters
                                         </span>
                                         <span class="text-text-primary font-medium">
                                             {item.chapters || "Unknown"}
                                         </span>
                                     </li>
-                                    <li class="flex flex-col gap-1">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
                                             Volumes
                                         </span>
                                         <span class="text-text-primary font-medium">
                                             {item.volumes || "Unknown"}
                                         </span>
                                     </li>
-                                    <li class="flex flex-col gap-1">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                            Published
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
+                                            Status
                                         </span>
                                         <span class="text-text-primary font-medium">
+                                            {item.status || "Unknown"}
+                                        </span>
+                                    </li>
+                                    <li class="flex justify-between">
+                                        <span class="text-text-muted">
+                                            Published
+                                        </span>
+                                        <span class="text-text-primary font-medium text-right">
                                             {item.published?.string ||
                                                 "Unknown"}
                                         </span>
                                     </li>
                                     {item.authors &&
                                         item.authors.length > 0 && (
-                                            <li class="flex flex-col gap-1">
-                                                <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                            <li class="flex justify-between">
+                                                <span class="text-text-muted">
                                                     Authors
                                                 </span>
-                                                <span class="text-text-primary font-medium">
+                                                <span class="text-text-primary font-medium text-right">
                                                     {item.authors
                                                         .map((a: any) => a.name)
                                                         .join(", ")}
@@ -165,68 +165,49 @@ const relateds = item.relations || [];
                                 </>
                             )
                         }
-                        <li class="flex flex-col gap-1">
-                            <span
-                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
-                                >Status</span
-                            >
-                            <span class="text-text-primary font-medium">
-                                <span
-                                    class={`inline-block w-2 h-2 rounded-full mr-2 ${item.status?.toLowerCase().includes("finished") || item.status?.toLowerCase().includes("complete") ? "bg-green-500" : "bg-blue-500"}`}
-                                ></span>
-                                {item.status || "Unknown"}
-                            </span>
-                        </li>
                     </ul>
                 </div>
-
-                <!-- related -->
                 <Details optionsDetails={relateds} client:visible />
-            </div>
+            </article>
 
-            {/* Right Column: Main Details */}
-            <div
-                class="flex-1 space-y-6 animate-fade-up"
+            <article
+                class="flex-1 space-y-8 animate-fade-up"
                 style="animation-delay: 0.2s"
             >
-                <!-- Header -->
                 <header class="space-y-4">
-                    <div class="flex flex-wrap gap-2 mb-4">
+                    <div class="flex flex-wrap gap-3">
                         {
                             item.genres?.map((g: any) => (
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors cursor-default">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20">
                                     {g.name}
                                 </span>
                             ))
                         }
                     </div>
                     <h1
-                        class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-clip-text text-transparent bg-linear-to-r from-text-primary via-text-secondary to-text-muted pb-2"
+                        class="text-3xl md:text-4xl lg:text-7xl font-black tracking-tight leading-tight text-text-primary"
                     >
                         {item.title}
                     </h1>
                     {
                         item.title_japanese && (
-                            <h2 class="text-xl md:text-2xl text-text-muted font-medium tracking-wide">
+                            <h2 class="text-xl md:text-2xl lg:text-4xl text-text-muted font-medium">
                                 {item.title_japanese}
                             </h2>
                         )
                     }
                 </header>
 
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div
-                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center group transition-transform hover:-translate-y-1"
-                    >
+                <section class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <article class="text-center">
                         <span
-                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest block mb-1"
                             >Score</span
                         >
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center justify-center gap-1.5">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="text-amber-400 size-5 group-hover:scale-110 transition-transform"
+                                class="text-amber-400 size-5"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
                             >
@@ -244,42 +225,33 @@ const relateds = item.relations || [];
                         </div>
                         {
                             item.scored_by && (
-                                <span class="text-text-muted text-[10px] mt-1">
+                                <span class="text-text-muted text-[10px]">
                                     {item.scored_by.toLocaleString()} users
                                 </span>
                             )
                         }
-                    </div>
-
-                    <div
-                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
-                    >
+                    </article>
+                    <article class="text-center">
                         <span
-                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest block mb-1"
                             >Rank</span
                         >
                         <span class="text-3xl font-black text-text-primary"
                             >#{item.rank || "N/A"}</span
                         >
-                    </div>
-
-                    <div
-                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
-                    >
+                    </article>
+                    <article class="text-center">
                         <span
-                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest block mb-1"
                             >Popularity</span
                         >
                         <span class="text-3xl font-black text-text-primary"
                             >#{item.popularity || "N/A"}</span
                         >
-                    </div>
-
-                    <div
-                        class="glass rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-transform hover:-translate-y-1"
-                    >
+                    </article>
+                    <article class="text-center">
                         <span
-                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest mb-2"
+                            class="text-text-muted text-[11px] font-bold uppercase tracking-widest block mb-1"
                             >Members</span
                         >
                         <span class="text-3xl font-black text-text-primary"
@@ -292,74 +264,42 @@ const relateds = item.relations || [];
                                     : "N/A"
                             }</span
                         >
-                    </div>
-                </div>
+                    </article>
+                </section>
 
-                <!-- Synopsis Text -->
                 {
                     item.synopsis && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.3s"
-                        >
-                            <div class="glass p-6 md:p-8 rounded-2xl">
-                                <h3 class="section-title text-2xl mb-4 font-bold">
-                                    Synopsis
-                                </h3>
-                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
-                                    {item.synopsis}
-                                </p>
-                            </div>
-                        </section>
+                        <p class="text-text-secondary leading-relaxed whitespace-pre-line text-base">
+                            {item.synopsis}
+                        </p>
                     )
                 }
 
-                <!-- Background Text -->
                 {
                     item.background && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.4s"
-                        >
-                            <h3 class="section-title text-2xl font-bold">
-                                Background
-                            </h3>
-                            <div class="glass p-6  rounded-2xl">
-                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
-                                    {item.background}
-                                </p>
-                            </div>
-                        </section>
+                        <p class="text-text-secondary leading-relaxed whitespace-pre-line text-base">
+                            {item.background}
+                        </p>
                     )
                 }
 
-                <!-- Trailer Video -->
                 {
                     isAnime && item.trailer?.youtube_id && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.5s"
-                        >
-                            <h3 class="section-title text-2xl font-bold">
-                                Trailer
-                            </h3>
-                            <div class="aspect-video w-full rounded-2xl overflow-hidden glass p-2 shadow-2xl shadow-accent/5">
-                                <iframe
-                                    class="w-full h-full rounded-xl"
-                                    src={`https://www.youtube.com/embed/${item.trailer.youtube_id}`}
-                                    title={`${item.title} Trailer`}
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen
-                                />
-                            </div>
-                        </section>
+                        <div class="aspect-video w-full rounded-2xl overflow-hidden">
+                            <iframe
+                                class="w-full h-full rounded-xl"
+                                src={`https://www.youtube.com/embed/${item.trailer.youtube_id}`}
+                                title={`${item.title} Trailer`}
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                            />
+                        </div>
                     )
                 }
 
-                {/* Characters Section */}
                 <CharactersList characters={characters} client:visible />
-            </div>
-        </div>
+            </article>
+        </section>
     </div>
 </Layout>

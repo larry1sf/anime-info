@@ -288,7 +288,7 @@ export default function Section({ watchListMode = false }: SectionProps) {
 
   return (
     <ErrorBoundary>
-      <section className="space-y-8 pt-14 min-h-dvh">
+      <section className="space-y-8 pt-14">
         {/* Línea 1: Título + desc | Tabs */}
         <div className="flex flex-wrap justify-between items-start gap-4">
           <div className="flex flex-col gap-1">

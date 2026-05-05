@@ -6,6 +6,7 @@ import {
     getCharacterManga,
 } from "@/service/getCharacters";
 import { formatNumber } from "@/const";
+import AppearancesList from "@/components/character/appearances";
 
 const { id } = Astro.params;
 
@@ -141,29 +142,23 @@ const { appearance, background, other } = categories;
 ---
 
 <Layout title={`${character.name} - Character Details`}>
-    <div class="pt-24 pb- animate-fade-in relative min-h-screen">
+    <div class="pt-14 animate-fade-in relative">
         <div
-            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-15 pointer-events-none"
+            class="fixed top-0 left-0 w-full h-full z-[-1] overflow-hidden opacity-10 pointer-events-none"
         >
             <img
                 src={imageUrl}
-                class="w-full h-full object-cover blur-[100px] scale-125"
+                class="w-full h-full object-cover blur-[80px] scale-110"
                 alt=""
                 aria-hidden="true"
             />
-            <div class="absolute inset-0 bg-bg/80"></div>
-            <div
-                class="absolute inset-0 bg-linear-to-t from-bg via-transparent to-transparent"
-            >
-            </div>
+            <div class="absolute inset-0 bg-bg/60"></div>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-10">
-            <!-- Left Column: Image & Info -->
-            <div class="w-full lg:w-80 shrink-0 space-y-6">
-                <!-- Character Image -->
+        <div class="flex flex-col lg:flex-row gap-12">
+            <div class="w-full lg:w-72 shrink-0 space-y-6">
                 <div
-                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 border border-border animate-fade-up relative group"
+                    class="rounded-2xl overflow-hidden shadow-2xl shadow-accent/10 animate-fade-up relative group"
                 >
                     {
                         imageUrl ? (
@@ -177,20 +172,16 @@ const { appearance, background, other } = categories;
                         )
                     }
                 </div>
-
-                <!-- Character Information (Static) -->
                 <div
-                    class="glass rounded-2xl p-6 space-y-5 animate-fade-up"
-                    style="animation-delay: 0.1s"
+                    class="space-y-3 animate-fade-up"
+                    style="animation-delay: 0.15s"
                 >
-                    <h3 class="section-title text-xl">Character Info</h3>
-                    <ul class="text-sm space-y-4">
+                    <h3 class="section-title text-xl">Information</h3>
+                    <ul class="text-sm space-y-3">
                         {
                             character.age && (
-                                <li class="flex flex-col gap-1">
-                                    <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                        Age
-                                    </span>
+                                <li class="flex justify-between">
+                                    <span class="text-text-muted">Age</span>
                                     <span class="text-text-primary font-medium">
                                         {character.age}
                                     </span>
@@ -199,8 +190,8 @@ const { appearance, background, other } = categories;
                         }
                         {
                             character.birthday && (
-                                <li class="flex flex-col gap-1">
-                                    <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                <li class="flex justify-between">
+                                    <span class="text-text-muted">
                                         Birthday
                                     </span>
                                     <span class="text-text-primary font-medium">
@@ -209,11 +200,8 @@ const { appearance, background, other } = categories;
                                 </li>
                             )
                         }
-                        <li class="flex flex-col gap-1">
-                            <span
-                                class="text-text-muted font-semibold uppercase tracking-wider text-[10px]"
-                                >Favorites</span
-                            >
+                        <li class="flex justify-between">
+                            <span class="text-text-muted">Favorites</span>
                             <span class="text-text-primary font-medium">
                                 {formatNumber(character.favorites)}
                             </span>
@@ -222,7 +210,7 @@ const { appearance, background, other } = categories;
                             character.nicknames &&
                                 character.nicknames.length > 0 && (
                                     <li class="flex flex-col gap-2">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
+                                        <span class="text-text-muted text-xs uppercase tracking-wider">
                                             Nicknames
                                         </span>
                                         <div class="flex flex-wrap gap-1">
@@ -240,232 +228,97 @@ const { appearance, background, other } = categories;
                     </ul>
                 </div>
 
-                <!-- Parsed About Info - Appearance -->
                 {
                     Object.keys(appearance).length > 0 && (
-                        <div
-                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                        <ul
+                            class="text-sm space-y-3 animate-fade-up"
                             style="animation-delay: 0.12s"
                         >
-                            <h3 class="section-title text-xl">Appearance</h3>
-                            <ul class="text-sm space-y-3">
-                                {Object.entries(appearance).map(
-                                    ([key, value]) => (
-                                        <li class="flex flex-col gap-0.5">
-                                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                                {key}
-                                            </span>
-                                            <span class="text-text-primary font-medium">
-                                                {value}
-                                            </span>
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        </div>
+                            {Object.entries(appearance).map(([key, value]) => (
+                                <li class="flex justify-between">
+                                    <span class="text-text-muted">{key}</span>
+                                    <span class="text-text-primary font-medium text-right">
+                                        {value}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
                     )
                 }
 
-                <!-- Parsed About Info - Background -->
                 {
                     Object.keys(background).length > 0 && (
-                        <div
-                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                        <ul
+                            class="text-sm space-y-3 animate-fade-up"
                             style="animation-delay: 0.13s"
                         >
-                            <h3 class="section-title text-xl">Background</h3>
-                            <ul class="text-sm space-y-3">
-                                {Object.entries(background).map(
-                                    ([key, value]) => (
-                                        <li class="flex flex-col gap-0.5">
-                                            <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                                {key}
-                                            </span>
-                                            <span class="text-text-primary font-medium">
-                                                {value}
-                                            </span>
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        </div>
+                            {Object.entries(background).map(([key, value]) => (
+                                <li class="flex justify-between">
+                                    <span class="text-text-muted">{key}</span>
+                                    <span class="text-text-primary font-medium text-right">
+                                        {value}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
                     )
                 }
 
-                <!-- Parsed About Info - Other -->
                 {
                     Object.keys(other).length > 0 && (
-                        <div
-                            class="glass rounded-2xl p-6 space-y-4 animate-fade-up"
+                        <ul
+                            class="text-sm space-y-3 animate-fade-up"
                             style="animation-delay: 0.14s"
                         >
-                            <h3 class="section-title text-xl">Other</h3>
-                            <ul class="text-sm space-y-3">
-                                {Object.entries(other).map(([key, value]) => (
-                                    <li class="flex flex-col gap-0.5">
-                                        <span class="text-text-muted font-semibold uppercase tracking-wider text-[10px]">
-                                            {key}
-                                        </span>
-                                        <span class="text-text-primary font-medium">
-                                            {value}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                            {Object.entries(other).map(([key, value]) => (
+                                <li class="flex justify-between">
+                                    <span class="text-text-muted">{key}</span>
+                                    <span class="text-text-primary font-medium text-right">
+                                        {value}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
                     )
                 }
             </div>
 
-            <!-- Right Column: Main Details -->
             <div
-                class="flex-1 space-y-6 animate-fade-up"
+                class="flex-1 space-y-8 animate-fade-up"
                 style="animation-delay: 0.2s"
             >
-                <!-- Header -->
                 <header class="space-y-4">
                     <h1
-                        class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-clip-text text-transparent bg-linear-to-r from-text-primary via-text-secondary to-text-muted pb-2"
+                        class="text-3xl md:text-4xl lg:text-7xl font-black tracking-tight leading-tight text-text-primary"
                     >
                         {character.name}
                     </h1>
                     {
                         character.name_kanji && (
-                            <h2 class="text-xl md:text-2xl text-text-muted font-medium tracking-wide">
+                            <h2 class="text-xl md:text-2xl lg:text-4xl text-text-muted font-medium">
                                 {character.name_kanji}
                             </h2>
                         )
                     }
                 </header>
 
-                <!-- About Text (Cleaned) -->
                 {
                     (cleanAbout ||
                         (character.about &&
                             Object.keys(appearance).length === 0 &&
                             Object.keys(background).length === 0 &&
                             Object.keys(other).length === 0)) && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.3s"
-                        >
-                            <div class="glass p-6 md:p-8 rounded-2xl">
-                                <h3 class="section-title text-2xl mb-4 font-bold">
-                                    About
-                                </h3>
-                                <p class="text-text-secondary leading-relaxed whitespace-pre-line text-[15px] md:text-base">
-                                    {cleanAbout || character.about}
-                                </p>
-                            </div>
-                        </section>
+                        <p class="text-text-secondary leading-relaxed whitespace-pre-line text-base">
+                            {cleanAbout || character.about}
+                        </p>
                     )
                 }
 
-                <!-- Anime Roles -->
-                {
-                    animeRoles.length > 0 && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.4s"
-                        >
-                            <h3 class="section-title text-2xl font-bold">
-                                Anime Appearances
-                            </h3>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {animeRoles.map((role) => (
-                                    <a
-                                        href={`/anime/${role.anime.mal_id}`}
-                                        class="group bg-surface border border-border rounded-xl overflow-hidden hover:border-border-hover transition-all duration-300"
-                                    >
-                                        <div class="aspect-3/4 relative overflow-hidden">
-                                            <img
-                                                src={
-                                                    role.anime.images?.webp
-                                                        ?.image_url ||
-                                                    role.anime.images?.jpg
-                                                        ?.image_url ||
-                                                    ""
-                                                }
-                                                alt={role.anime.title}
-                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                loading="lazy"
-                                            />
-                                            <div class="absolute inset-0 bg-linear-to-t from-surface via-transparent to-transparent" />
-                                        </div>
-                                        <div class="p-3">
-                                            <h3 class="text-sm font-medium text-text-primary line-clamp-2 mb-1">
-                                                {role.anime.title_english ||
-                                                    role.anime.title}
-                                            </h3>
-                                            <p class="text-xs text-accent uppercase tracking-wider">
-                                                {role.role}
-                                            </p>
-                                        </div>
-                                    </a>
-                                ))}
-                            </div>
-                        </section>
-                    )
-                }
-
-                <!-- Manga Roles -->
-                {
-                    mangaRoles.length > 0 && (
-                        <section
-                            class="space-y-5 animate-fade-up"
-                            style="animation-delay: 0.5s"
-                        >
-                            <h3 class="section-title text-2xl font-bold">
-                                Manga Appearances
-                            </h3>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {mangaRoles.map((role) => (
-                                    <a
-                                        href={`/manga/${role.manga.mal_id}`}
-                                        class="group bg-surface border border-border rounded-xl overflow-hidden hover:border-border-hover transition-all duration-300"
-                                    >
-                                        <div class="aspect-3/4 relative overflow-hidden">
-                                            <img
-                                                src={
-                                                    role.manga.images?.webp
-                                                        ?.image_url ||
-                                                    role.manga.images?.jpg
-                                                        ?.image_url ||
-                                                    ""
-                                                }
-                                                alt={role.manga.title}
-                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                loading="lazy"
-                                            />
-                                            <div class="absolute inset-0 bg-linear-to-t from-surface via-transparent to-transparent" />
-                                        </div>
-                                        <div class="p-3">
-                                            <h3 class="text-sm font-medium text-text-primary line-clamp-2 mb-1">
-                                                {role.manga.title_english ||
-                                                    role.manga.title}
-                                            </h3>
-                                            <p class="text-xs text-accent-pink uppercase tracking-wider">
-                                                {role.role}
-                                            </p>
-                                        </div>
-                                    </a>
-                                ))}
-                            </div>
-                        </section>
-                    )
-                }
-
-                <!-- Empty State -->
-                {
-                    animeRoles.length === 0 && mangaRoles.length === 0 && (
-                        <div class="flex flex-col items-center justify-center py-12 text-center">
-                            <p class="text-text-muted">
-                                No anime or manga appearances found for this
-                                character.
-                            </p>
-                        </div>
-                    )
-                }
+                <AppearancesList
+                    animeRoles={animeRoles}
+                    mangaRoles={mangaRoles}
+                    client:visible
+                />
             </div>
         </div>
     </div>

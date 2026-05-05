@@ -1,10 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Card from "@/components/anime/card";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import FilterBar, {
-  type FilterConfig,
-  type FilterOption,
-} from "@/components/filter-bar";
+import Select from "@/components/anime/select";
 import {
   typesOptions,
   statusOptions,
@@ -14,13 +11,22 @@ import {
   LIMIT_ANIME,
   KEY_LOCAL_STORAGE,
 } from "@/const";
-import { IconBook, IconDeviceTv, IconBookmarkOff } from "@tabler/icons-react";
+import {
+  IconBook,
+  IconDeviceTv,
+  IconBookmarkOff,
+  IconSearch,
+  IconX,
+  IconAdjustments,
+} from "@tabler/icons-react";
 import type { Anime, PaginationParse } from "@/types/anime";
+import type { FilterOption } from "@/types/character";
 
 const optionsViews = [
   { slug: "anime", name: "Anime", icon: <IconDeviceTv size={14} /> },
   { slug: "manga", name: "Manga", icon: <IconBook size={14} /> },
 ];
+
 const filtersInitial = {
   orderBy: { slug: "mal_id", label: "Default" },
   sort: { slug: "desc", label: "Desc" },
@@ -69,8 +75,18 @@ export default function Section({ watchListMode = false }: SectionProps) {
   );
   const [filters, setFilters] = useState(filtersInitial);
 
-  // Search state
+  const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const fetchData = useCallback(
     async ({ page }: { page: number }) => {
@@ -231,62 +247,179 @@ export default function Section({ watchListMode = false }: SectionProps) {
     setFilters((prev) => ({ ...prev, [key]: option }));
   };
 
-  const renderFilters = (): FilterConfig[] => {
-    const tabKey = tab as keyof typeof typesOptions;
-    return [
-      { key: "orderBy", label: "Sort By", options: orderByOptions },
-      { key: "sort", label: "Order", options: sortOptions },
-      { key: "type", label: "Type", options: typesOptions[tabKey] || [] },
-      { key: "status", label: "Status", options: statusOptions[tabKey] || [] },
-      { key: "year", label: "Year", options: yearOptions[tabKey] || [] },
-    ];
+  const toggleSearchMode = () => {
+    setIsSearchMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setFilters(filtersInitial);
+        setTimeout(() => searchInputRef.current?.focus(), 350);
+      } else {
+        setSearchQuery("");
+        setDebouncedQuery("");
+      }
+      return next;
+    });
   };
+
+  const getFilterOptions = (key: string): FilterOption[] => {
+    const tabKey = tab as keyof typeof typesOptions;
+    switch (key) {
+      case "orderBy":
+        return orderByOptions;
+      case "sort":
+        return sortOptions;
+      case "type":
+        return typesOptions[tabKey] || [];
+      case "status":
+        return statusOptions[tabKey] || [];
+      case "year":
+        return yearOptions[tabKey] || [];
+      default:
+        return [];
+    }
+  };
+
+  const hasActiveFilters = Object.values(filters).filter(
+    (f) => f && f.slug && f.slug !== "",
+  ).length;
+
+  const primaryFilters = ["orderBy", "sort", "type"];
+  const secondaryFilters = ["status", "year"];
 
   return (
     <ErrorBoundary>
       <section className="space-y-8 pt-14 min-h-dvh">
-        {/* Header with title + controls */}
-        <article className="flex flex-col gap-6">
-          {/* Tab switcher */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-            <div className="flex flex-col gap-3">
-              <h2 className="section-title">
-                {watchListMode ? "My Watchlist" : "Browse"}
-              </h2>
-              <div className="flex items-center gap-1 bg-surface rounded-xl border border-border p-1">
-                {optionsViews.map((option) => (
-                  <button
-                    key={option.slug}
-                    type="button"
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
-                      option.slug === tab
-                        ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
-                        : "text-text-muted hover:text-text-primary hover:bg-white/4"
-                    }`}
-                    onClick={() => handleChangeTab(option.slug)}
-                  >
-                    {option.icon}
-                    {option.name}
-                  </button>
-                ))}
+        {/* Línea 1: Título + desc | Tabs */}
+        <div className="flex flex-wrap justify-between items-start gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="section-title">
+              {watchListMode ? "My Watchlist" : "Browse"}
+            </h2>
+            {!watchListMode && (
+              <p className="text-text-muted text-sm">
+                Explore anime and manga from around the world
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-1 bg-surface rounded-xl border border-border p-1 w-fit">
+            {optionsViews.map((option) => (
+              <button
+                key={option.slug}
+                type="button"
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
+                  option.slug === tab
+                    ? "bg-accent text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
+                    : "text-text-muted hover:text-text-primary hover:bg-white/4"
+                }`}
+                onClick={() => handleChangeTab(option.slug)}
+              >
+                {option.icon}
+                {option.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Línea 2: Switch + Search | Filtros */}
+        <div className="relative z-10 flex flex-wrap items-end gap-3">
+          {/* Switch + Search a la izquierda */}
+          <div className="flex items-end gap-2 order-1">
+            <button
+              type="button"
+              onClick={toggleSearchMode}
+              className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl border cursor-pointer transition-all duration-300 ${
+                isSearchMode
+                  ? "bg-accent border-accent/30 text-bg shadow-[0_0_16px_-4px_rgba(167,139,250,0.3)]"
+                  : "bg-surface border-border text-text-muted hover:text-text-primary hover:border-border-hover"
+              }`}
+              title={isSearchMode ? "Volver a filtros" : "Buscar"}
+            >
+              {isSearchMode ? <IconX size={16} /> : <IconSearch size={16} />}
+            </button>
+
+            {/* Search input */}
+            <div
+              className={`transition-all duration-300 ease-in-out ${
+                isSearchMode
+                  ? "w-48 sm:w-64 opacity-100"
+                  : "w-0 opacity-0 overflow-hidden"
+              }`}
+            >
+              <div className="relative">
+                <IconSearch
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={`Search ${tab}...`}
+                  className="w-full pl-8 pr-3 py-2.5 rounded-xl border bg-surface border-border text-text-primary text-xs font-medium placeholder:text-text-muted/50 transition-all duration-300 focus:outline-none focus:bg-surface-elevated focus:border-accent/30 focus:shadow-[0_0_16px_-6px_rgba(167,139,250,0.2)]"
+                />
               </div>
             </div>
           </div>
 
-          {/* Filter Bar */}
-          <FilterBar
-            filters={renderFilters()}
-            values={filters}
-            onChange={handleFilterChange}
-            showSearch={true}
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder={`Search ${tab}...`}
-            // searchIcon={<IconSearch size={16} />}
-          />
-        </article>
+          {/* Filtros a la derecha del switch */}
+          <nav
+            className={`flex items-end gap-3 transition-all duration-300 ease-in-out order-2 ${
+              isSearchMode
+                ? "opacity-0 scale-95 pointer-events-none hidden"
+                : "flex flex-wrap"
+            }`}
+          >
+            {primaryFilters.map((key) => (
+              <Select
+                key={key}
+                selected={filters[key as keyof typeof filters]}
+                handleSelect={(selected) => handleFilterChange(key, selected)}
+                options={getFilterOptions(key)}
+                label={
+                  key === "orderBy"
+                    ? "Sort By"
+                    : key === "sort"
+                      ? "Order"
+                      : "Type"
+                }
+              />
+            ))}
 
-        {/* Cards grid */}
+            {showMoreFilters &&
+              !isSearchMode &&
+              secondaryFilters.map((key) => (
+                <Select
+                  key={key}
+                  selected={filters[key as keyof typeof filters]}
+                  handleSelect={(selected) => handleFilterChange(key, selected)}
+                  options={getFilterOptions(key)}
+                  label={key === "status" ? "Status" : "Year"}
+                />
+              ))}
+
+            {secondaryFilters.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowMoreFilters(!showMoreFilters)}
+                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-all duration-300 cursor-pointer ${
+                  showMoreFilters || hasActiveFilters > 0
+                    ? "bg-accent/10 border-accent/40 text-accent"
+                    : "bg-surface border-border text-text-secondary hover:text-text-primary hover:border-border-hover"
+                }`}
+              >
+                <IconAdjustments size={14} />
+                {showMoreFilters ? "Less" : "More"}
+                {hasActiveFilters > 0 && !showMoreFilters && (
+                  <span className="w-4 h-4 flex items-center justify-center text-[10px] font-bold bg-accent text-bg rounded-full">
+                    {hasActiveFilters}
+                  </span>
+                )}
+              </button>
+            )}
+          </nav>
+        </div>
+
         <section className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-5">
           {isLoading ? (
             Array(LIMIT_ANIME)
@@ -347,7 +480,7 @@ export default function Section({ watchListMode = false }: SectionProps) {
               <button
                 disabled={dataPagination.currentPage === 1}
                 onClick={handlePrevPage}
-                className="cursor-pointer group flex items-center gap-2 bg-accent hover:bg-accent/90 text-bg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)]"
+                className="cursor-pointer group flex items-center gap-2 bg-accent hover:bg-accent/90 text-bg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent disabled:hover:shadow-none"
               >
                 Previous
               </button>
@@ -359,7 +492,7 @@ export default function Section({ watchListMode = false }: SectionProps) {
                 disabled={
                   dataPagination.currentPage === dataPagination.totalPages
                 }
-                className="cursor-pointer group flex items-center gap-2 bg-accent hover:bg-accent/90 text-bg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)]"
+                className="cursor-pointer group flex items-center gap-2 bg-accent hover:bg-accent/90 text-bg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_24px_-4px_rgba(167,139,250,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent disabled:hover:shadow-none"
               >
                 Next
               </button>
